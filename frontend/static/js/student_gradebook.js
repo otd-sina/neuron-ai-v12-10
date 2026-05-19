@@ -165,7 +165,7 @@ function renderGradebook(payload) {
   renderSummary(report);
   renderSubjectAverages(report.subject_breakdown);
   renderGrades(report.recent_assessments);
-  renderAttendance(payload.attendance_exceptions || []);
+  renderAttendance(payload.attendance_log || payload.attendance_exceptions || []);
   renderParticipation(payload.participation_records || []);
 }
 
