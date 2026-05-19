@@ -62,6 +62,8 @@ function gradeTypeLabel(type) {
     final: "پایان‌ترم",
     homework: "تکلیف",
     project: "پروژه",
+    exam: "آزمون",
+    assignment: "تکلیف",
   }[type] || type || "—";
 }
 
@@ -152,6 +154,14 @@ function renderParticipation(records) {
 
 function renderGradebook(payload) {
   const report = payload.report_card || {};
+  if (!report || typeof report !== "object") {
+    renderEmpty(refs.summary, "اطلاعات کارنامه در دسترس نیست.");
+    renderEmpty(refs.subjects, "اطلاعاتی برای نمایش وجود ندارد.");
+    renderEmpty(refs.gradesTable, "اطلاعاتی برای نمایش وجود ندارد.");
+    renderEmpty(refs.attendanceTable, "اطلاعاتی برای نمایش وجود ندارد.");
+    renderEmpty(refs.participationTable, "اطلاعاتی برای نمایش وجود ندارد.");
+    return;
+  }
   renderSummary(report);
   renderSubjectAverages(report.subject_breakdown);
   renderGrades(report.recent_assessments);
