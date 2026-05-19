@@ -62,6 +62,8 @@ function gradeTypeLabel(type) {
     final: "پایان‌ترم",
     homework: "تکلیف",
     project: "پروژه",
+    exam: "آزمون",
+    assignment: "تکلیف",
   }[type] || type || "—";
 }
 
@@ -70,27 +72,26 @@ function renderEmpty(target, message) {
 }
 
 function renderSummary(data) {
-  const average = data.average || {};
-  const attendance = data.attendance || {};
-  const participation = data.participation || {};
+  const gradeAverage = data.grade_average_percentage;
+  const attendance = data.attendance_summary || {};
+  const participation = data.participation_summary || {};
 
   refs.summary.innerHTML = `
     <div class="gradebook-summary">
-      <div class="grade-stat"><span class="stat-label">میانگین کلی</span><span class="stat-value">${formatValue(average.average_percentage, "%")}</span></div>
-      <div class="grade-stat"><span class="stat-label">GPA</span><span class="stat-value">${formatValue(average.gpa)}</span></div>
-      <div class="grade-stat"><span class="stat-label">نرخ حضور</span><span class="stat-value">${formatValue(attendance.attendance_rate, "%")}</span></div>
-      <div class="grade-stat"><span class="stat-label">میانگین مشارکت</span><span class="stat-value">${formatValue(participation.average_score)} / 10</span></div>
+      <div class="grade-stat"><span class="stat-label">میانگین کلی</span><span class="stat-value">${formatValue(gradeAverage, "%")}</span></div>
+      <div class="grade-stat"><span class="stat-label">ارزیابی‌ها</span><span class="stat-value">${formatValue(data.assessment_count)}</span></div>
+      <div class="grade-stat"><span class="stat-label">نرخ حضور</span><span class="stat-value">${formatValue(attendance.present_rate, "%")}</span></div>
+      <div class="grade-stat"><span class="stat-label">میانگین مشارکت</span><span class="stat-value">${formatValue(participation.average_score)} / 5</span></div>
     </div>
   `;
-  refs.updated.textContent = "آخرین بروزرسانی: اکنون";
-  refs.gradesCount.textContent = `${average.total_grades || 0} نمره`;
-  refs.attendanceRate.textContent = `نرخ حضور: ${formatValue(attendance.attendance_rate, "%")}`;
-  refs.participationAverage.textContent = `میانگین: ${formatValue(participation.average_score)} / 10`;
+
+  refs.gradesCount.textContent = `${data.assessment_count || 0} نمره`;
+  refs.attendanceRate.textContent = `نرخ حضور: ${formatValue(attendance.present_rate, "%")}`;
+  refs.participationAverage.textContent = `میانگین: ${formatValue(participation.average_score)} / 5`;
 }
 
-function renderSubjectAverages(subjectAverages) {
-  const entries = Object.entries(subjectAverages || {});
-  if (!entries.length) {
+function renderSubjectAverages(subjectBreakdown) {
+  if (!Array.isArray(subjectBreakdown) || !subjectBreakdown.length) {
     renderEmpty(refs.subjects, "هنوز میانگین درسی ثبت نشده است.");
     return;
   }
@@ -98,9 +99,9 @@ function renderSubjectAverages(subjectAverages) {
   refs.subjects.innerHTML = `
     <div class="student-gradebook-table-wrap">
       <table class="student-gradebook-table">
-        <thead><tr><th>درس</th><th>میانگین</th><th>GPA</th><th>تعداد</th></tr></thead>
+        <thead><tr><th>درس</th><th>میانگین</th><th>تعداد ارزیابی</th></tr></thead>
         <tbody>
-          ${entries.map(([subject, avg]) => `<tr><td>${subject}</td><td>${formatValue(avg.average_percentage, "%")}</td><td>${formatValue(avg.gpa)}</td><td>${avg.total_grades || 0}</td></tr>`).join("")}
+          ${subjectBreakdown.map((item) => `<tr><td>${item.subject || "—"}</td><td>${formatValue(item.average_percentage, "%")}</td><td>${item.assessment_count || 0}</td></tr>`).join("")}
         </tbody>
       </table>
     </div>
@@ -118,7 +119,7 @@ function renderGrades(grades) {
       <table class="student-gradebook-table">
         <thead><tr><th>درس</th><th>نمره</th><th>درصد</th><th>نوع</th><th>تاریخ</th></tr></thead>
         <tbody>
-          ${grades.map((grade) => `<tr><td>${grade.subject}</td><td>${grade.score} / ${grade.max_score}</td><td>${grade.percentage}%</td><td>${gradeTypeLabel(grade.grade_type)}</td><td>${formatDate(grade.exam_date)}</td></tr>`).join("")}
+          ${grades.map((grade) => `<tr><td>${grade.subject || "—"}</td><td>${formatValue(grade.score)} / ${formatValue(grade.max_score)}</td><td>${formatValue(grade.percentage, "%")}</td><td>${gradeTypeLabel(grade.assessment_type)}</td><td>${formatDate(grade.recorded_at)}</td></tr>`).join("")}
         </tbody>
       </table>
     </div>
@@ -133,7 +134,7 @@ function renderAttendance(records) {
 
   refs.attendanceTable.innerHTML = `
     <ul class="mini-list">
-      ${records.map((record) => `<li class="mini-list-item"><p><strong>${attendanceLabel(record.status)}</strong></p><div class="mini-list-meta"><span>${formatDate(record.date)}</span><span>${record.notes || "بدون یادداشت"}</span></div></li>`).join("")}
+      ${records.map((record) => `<li class="mini-list-item"><p><strong>${attendanceLabel(record.status)}</strong></p><div class="mini-list-meta"><span>${formatDate(record.date)}</span><span>${record.note || "بدون یادداشت"}</span></div></li>`).join("")}
     </ul>
   `;
 }
@@ -146,17 +147,26 @@ function renderParticipation(records) {
 
   refs.participationTable.innerHTML = `
     <ul class="mini-list">
-      ${records.map((record) => `<li class="mini-list-item"><p><strong>${record.activity}</strong></p><div class="mini-list-meta"><span>${record.score} / 10</span><span>${formatDate(record.date)}</span><span>${record.notes || "بدون یادداشت"}</span></div></li>`).join("")}
+      ${records.map((record) => `<li class="mini-list-item"><p><strong>امتیاز مشارکت</strong></p><div class="mini-list-meta"><span>${formatValue(record.score)} / 5</span><span>${formatDate(record.date)}</span><span>${record.note || "بدون یادداشت"}</span></div></li>`).join("")}
     </ul>
   `;
 }
 
-function renderGradebook(data) {
-  renderSummary(data);
-  renderSubjectAverages(data.subject_averages);
-  renderGrades(data.grades);
-  renderAttendance(data.attendance_records || data.recent_attendance);
-  renderParticipation(data.participation_records || data.recent_participation);
+function renderGradebook(payload) {
+  const report = payload.report_card || {};
+  if (!report || typeof report !== "object") {
+    renderEmpty(refs.summary, "اطلاعات کارنامه در دسترس نیست.");
+    renderEmpty(refs.subjects, "اطلاعاتی برای نمایش وجود ندارد.");
+    renderEmpty(refs.gradesTable, "اطلاعاتی برای نمایش وجود ندارد.");
+    renderEmpty(refs.attendanceTable, "اطلاعاتی برای نمایش وجود ندارد.");
+    renderEmpty(refs.participationTable, "اطلاعاتی برای نمایش وجود ندارد.");
+    return;
+  }
+  renderSummary(report);
+  renderSubjectAverages(report.subject_breakdown);
+  renderGrades(report.recent_assessments);
+  renderAttendance(payload.attendance_log || payload.attendance_exceptions || []);
+  renderParticipation(payload.participation_records || []);
 }
 
 async function loadGradebook() {
@@ -171,7 +181,7 @@ async function loadGradebook() {
   refs.refresh.textContent = "در حال بروزرسانی...";
 
   try {
-    const response = await fetch("/api/gradebook/student/my-grades", {
+    const response = await fetch("/api/student/gradebook", {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await response.json();
@@ -187,6 +197,7 @@ async function loadGradebook() {
     }
 
     renderGradebook(data);
+    refs.updated.textContent = `آخرین بروزرسانی: ${new Intl.DateTimeFormat("fa-IR-u-ca-persian", { hour: "2-digit", minute: "2-digit" }).format(new Date())}`;
     refs.content.classList.remove("hidden");
   } catch (error) {
     showAlert(error.message || "خطا در دریافت کارنامه.");

@@ -1099,6 +1099,31 @@ def get_student_gradebook_timeline(student_id: int, class_id: int | None = None)
         "attendance_exceptions": attendance_exceptions,
         "participation_records": participation_records,
     }
+
+
+def get_student_attendance_log(student_id: int, class_id: int | None = None) -> list[dict]:
+    student = get_student(student_id)
+    if student is None:
+        return []
+
+    resolved_class_id = class_id if isinstance(class_id, int) else student.get("class_id")
+    if not isinstance(resolved_class_id, int):
+        return []
+
+    student_key = str(student_id)
+    rows: list[dict] = []
+    for date_token in list_class_attendance_dates(resolved_class_id):
+        entry = _load_attendance_exceptions(resolved_class_id, date_token).get(student_key) or {}
+        rows.append(
+            {
+                "date": date_token,
+                "status": _normalize_attendance_status(entry.get("status")),
+                "note": _normalize_text(entry.get("note")),
+            }
+        )
+
+    rows.sort(key=lambda item: item.get("date") or "", reverse=True)
+    return rows
 def get_student_gradebook_summary(student_id: int, class_id: int | None = None) -> dict | None:
     report = build_student_report_card(student_id, class_id=class_id)
     if not isinstance(report, dict):

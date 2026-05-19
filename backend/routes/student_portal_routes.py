@@ -7,7 +7,11 @@ from pydantic import BaseModel, Field
 
 from backend.db.helpers import db_get, db_set, next_counter
 from backend.middleware.student_auth import require_student_auth
-from backend.modules.gradebook import build_student_report_card, get_student_gradebook_timeline
+from backend.modules.gradebook import (
+    build_student_report_card,
+    get_student_attendance_log,
+    get_student_gradebook_timeline,
+)
 from backend.modules.student_portal import (
     authenticate_student,
     build_dashboard_payload,
@@ -570,6 +574,10 @@ async def student_gradebook(request: Request):
         content={
             "success": True,
             "report_card": report_card,
+            "attendance_log": get_student_attendance_log(
+                student_id,
+                class_id=student.get("class_id") if isinstance(student, dict) else None,
+            ),
             "attendance_exceptions": timeline.get("attendance_exceptions", []),
             "participation_records": timeline.get("participation_records", []),
         }
