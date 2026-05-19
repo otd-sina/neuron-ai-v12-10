@@ -1,0 +1,5 @@
+.auth-card {
+  width: min(440px, 100%);
+  padding: 32px;
+  animation: rise-in 0.7s ease;
+}

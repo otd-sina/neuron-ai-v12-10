@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>پروفایل دانش‌آموز - نورون</title>
+  <link rel="stylesheet" href="/static/css/student.css" />
+</head>
+<body class="student-page profile-page has-bottom-nav" data-nav-page="profile">
+  <div class="bg-orb orb-one"></div>
+  <div class="bg-orb orb-two"></div>
+
+  <header class="student-header section-header glass-card">
+    <div>
+      <p class="chip">Student Profile</p>
+      <h1 id="profile-title">پروفایل دانش‌آموز</h1>
+      <p class="muted">اطلاعات کاربری، کلاس و وضعیت یادگیری‌ات اینجا نمایش داده می‌شود.</p>
+    </div>
+  </header>
+
+  <main class="dashboard-shell list-page-shell">
+    <section id="profile-alert" class="alert error hidden" role="alert"></section>
+
+    <section id="profile-card" class="glass-card profile-card"></section>
+
+    <button id="profile-logout-button" class="btn-danger profile-logout-btn" type="button">خروج از حساب</button>
+  </main>
+
+  <nav class="floating-bottom-nav glass-card" aria-label="ناوبری اصلی دانش‌آموز">
+    <a href="/student/dashboard" class="bottom-nav-item" data-nav="home" aria-label="خانه">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 11.5L12 4l9 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10.5V20h13V10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>خانه</span>
+    </a>
+    <a href="/student/subjects" class="bottom-nav-item" data-nav="tutor" aria-label="معلم هوش مصنوعی">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 8.5a4 4 0 118 0V10a3 3 0 013 3v1.5A4.5 4.5 0 0114.5 19H9.5A4.5 4.5 0 015 14.5V13a3 3 0 013-3V8.5z" stroke="currentColor" stroke-width="1.8"/><path d="M9 14h6M12 6v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>معلم هوشمند</span>
+    </a>
+    <a href="/student/assignments" class="bottom-nav-item" data-nav="assignments" aria-label="تکالیف">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>تکالیف</span>
+    </a>
+    <a href="/student/gradebook" class="bottom-nav-item" data-nav="gradebook" aria-label="کارنامه">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 4h12v16H6z" stroke="currentColor" stroke-width="1.8"/><path d="M9 8h6M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>کارنامه</span>
+    </a>
+    <a href="/student/exams" class="bottom-nav-item" data-nav="exams" aria-label="آزمون و تحلیل">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19V9m7 10V5m7 14v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="5" cy="7" r="2" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="3" r="2" stroke="currentColor" stroke-width="1.8"/><circle cx="19" cy="10" r="2" stroke="currentColor" stroke-width="1.8"/></svg>
+      <span>آزمون‌ها</span>
+    </a>
+    <a href="/student/profile" class="bottom-nav-item" data-nav="profile" aria-label="پروفایل">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M5 19a7 7 0 0114 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>پروفایل</span>
+    </a>
+  </nav>
+
+  <script src="/static/js/student_navigation.js"></script>
+  <script src="/static/js/student_profile.js"></script>
+</body>
+</html>

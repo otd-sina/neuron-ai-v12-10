@@ -1,0 +1,30 @@
+.chip {
+  display: inline-block;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.score-pill {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(77, 224, 193, 0.2);
+  border: 1px solid rgba(77, 224, 193, 0.45);
+}
+
+.alert {
+  margin-top: 16px;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 0.9rem;
+}
+
+.alert.error {
+  border: 1px solid rgba(255, 109, 145, 0.6);
+  background: rgba(255, 74, 130, 0.22);
+  color: #ffe6ef;
+}

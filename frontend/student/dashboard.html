@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>داشبورد دانش‌آموز - نورون</title>
+  <link rel="stylesheet" href="/static/css/student.css" />
+</head>
+<body class="student-page dashboard-page has-bottom-nav" data-nav-page="home">
+  <div class="bg-orb orb-one"></div>
+  <div class="bg-orb orb-two"></div>
+
+  <header class="student-header dashboard-header" id="dashboard-header">
+    <div>
+      <p class="chip">داشبورد شخصی</p>
+      <h1 id="greeting">سلام، خوش آمدی!</h1>
+    </div>
+    <button id="logout-button" class="btn-danger header-logout-btn" type="button">خروج</button>
+  </header>
+
+  <main class="dashboard-shell">
+    <section id="dashboard-alert" class="alert error hidden" role="alert"></section>
+
+    <section id="loading-state" class="glass-card loading-box">
+      <div class="spinner"></div>
+      <p>در حال دریافت اطلاعات داشبورد...</p>
+    </section>
+
+    <section id="dashboard-content" class="dashboard-content hidden">
+      <article class="hero-tutor-card" data-animate>
+        <div class="hero-tutor-content">
+          <p class="hero-kicker">Smart Exam Builder</p>
+          <h2>برای مطالعه امروز کمک می‌خوای؟</h2>
+          <p>با برنامه یادگیری هوشمند، ربات مناسب درسی‌ات را انتخاب کن و مستقیم شروع کن.</p>
+          <button id="start-tutoring-button" class="hero-cta-btn" type="button">شروع Smart Tutoring</button>
+        </div>
+        <div class="hero-visual" aria-hidden="true">🧠</div>
+      </article>
+
+      <a href="about.html" class="glass-card home-about-banner" data-animate>
+        <div>
+          <p class="home-about-kicker">نگاهی به پلتفرم</p>
+          <h2>درباره ما و چشم‌انداز مدرسه را ببین</h2>
+          <p>با اهداف آموزشی، حقوق استفاده و مسیر هوشمند یادگیری در این سامانه آشنا شو.</p>
+        </div>
+        <span class="home-about-cta">ورود به صفحه درباره پلتفرم</span>
+      </a>
+
+      <article class="glass-card dashboard-card" data-animate>
+        <div class="card-head-row">
+          <h2>کارنامه و عملکرد تحصیلی</h2>
+          <span id="gradebook-hint" class="card-hint">در حال بارگذاری...</span>
+        </div>
+        <div id="gradebook-content" class="card-body"></div>
+        <button id="view-gradebook" class="card-link-btn" type="button">مشاهده کارنامه کامل</button>
+      </article>
+
+      <article class="glass-card dashboard-card" data-animate>
+        <div class="card-head-row">
+          <h2>تکالیف فعال</h2>
+          <span id="assignment-count-hint" class="card-hint">در حال بارگذاری...</span>
+        </div>
+        <div id="assignment-content" class="card-body"></div>
+        <button id="view-all-assignments" class="card-link-btn" type="button">مشاهده همه تکالیف</button>
+      </article>
+
+      <article class="glass-card dashboard-card" data-animate>
+        <div class="card-head-row">
+          <h2>آزمون‌ها و نقاط ضعف اخیر</h2>
+          <span id="exam-count-hint" class="card-hint">در حال بارگذاری...</span>
+        </div>
+        <div id="recent-exams-content" class="card-body"></div>
+        <div class="weakness-block">
+          <h3>نقاط ضعف شناسایی‌شده</h3>
+          <div id="weakness-chips" class="weakness-chips"></div>
+        </div>
+        <button id="view-all-exams" class="card-link-btn" type="button">آنالیتیکس و تاریخچه کامل</button>
+      </article>
+    </section>
+  </main>
+
+  <details class="home-dev-accordion glass-card">
+    <summary class="home-dev-summary">
+      <span>توسعه داده شده توسط تیم نورون</span>
+      <svg class="home-dev-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </summary>
+    <div class="home-dev-panel">
+      <div class="home-dev-panel-inner">
+        <a href="#" class="home-dev-link" target="_blank" rel="noopener noreferrer">وب‌سایت تیم نورون</a>
+        <p>ارتباط با توسعه‌دهندگان: جعفرپور 09054660985 - شهبازی 09055662118</p>
+        <p>تمامی حقوق بهره‌برداری این وب‌سایت برای تیم توسعه محفوظ است.</p>
+      </div>
+    </div>
+  </details>
+
+  <nav class="floating-bottom-nav glass-card" aria-label="ناوبری اصلی دانش‌آموز">
+    <a href="/student/dashboard" class="bottom-nav-item" data-nav="home" aria-label="خانه">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 11.5L12 4l9 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10.5V20h13V10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>خانه</span>
+    </a>
+    <a href="/student/subjects" class="bottom-nav-item" data-nav="tutor" aria-label="معلم هوش مصنوعی">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 8.5a4 4 0 118 0V10a3 3 0 013 3v1.5A4.5 4.5 0 0114.5 19H9.5A4.5 4.5 0 015 14.5V13a3 3 0 013-3V8.5z" stroke="currentColor" stroke-width="1.8"/><path d="M9 14h6M12 6v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>معلم هوشمند</span>
+    </a>
+    <a href="/student/assignments" class="bottom-nav-item" data-nav="assignments" aria-label="تکالیف">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>تکالیف</span>
+    </a>
+    <a href="/student/gradebook" class="bottom-nav-item" data-nav="gradebook" aria-label="کارنامه">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 4h12v16H6z" stroke="currentColor" stroke-width="1.8"/><path d="M9 8h6M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>کارنامه</span>
+    </a>
+    <a href="/student/exams" class="bottom-nav-item" data-nav="exams" aria-label="آزمون و تحلیل">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19V9m7 10V5m7 14v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="5" cy="7" r="2" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="3" r="2" stroke="currentColor" stroke-width="1.8"/><circle cx="19" cy="10" r="2" stroke="currentColor" stroke-width="1.8"/></svg>
+      <span>آزمون‌ها</span>
+    </a>
+    <a href="/student/profile" class="bottom-nav-item" data-nav="profile" aria-label="پروفایل">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M5 19a7 7 0 0114 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>پروفایل</span>
+    </a>
+  </nav>
+
+  <script src="/static/js/student_navigation.js"></script>
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

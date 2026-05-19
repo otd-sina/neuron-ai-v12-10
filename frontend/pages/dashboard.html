@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>داشبورد تحلیلی مدیریت - نورون</title>
+  <script>
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('neuron-admin-theme');
+        const theme = savedTheme === 'light' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/pages/admin_analytics.css" />
+  <script src="/static/js/common.js" defer></script>
+  <script src="/static/js/admin_analytics_dashboard.js" defer></script>
+</head>
+<body class="analytics-page">
+  <div class="page-glow glow-one" aria-hidden="true"></div>
+  <div class="page-glow glow-two" aria-hidden="true"></div>
+
+  <div class="admin-layout" dir="rtl">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <h1>🧠 نورون</h1>
+        <span>Admin Analytics Suite</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">منو اصلی</div>
+        <a href="/admin/dashboard" class="nav-item active" data-page="dashboard">
+          <span class="icon">📊</span> داشبورد تحلیلی
+        </a>
+        <a href="/admin/students" class="nav-item" data-page="students">
+          <span class="icon">👩‍🎓</span> مدیریت دانش‌آموزان
+        </a>
+        <a href="/admin/classes" class="nav-item" data-page="classes">
+          <span class="icon">🏫</span> مدیریت کلاس‌ها
+        </a>
+        <a href="/admin/assignments" class="nav-item" data-page="assignments">
+          <span class="icon">📋</span> تکالیف
+        </a>
+        <a href="/admin/create-exam" class="nav-item" data-page="create-exam">
+          <span class="icon">🧪</span> ساخت آزمون مدرسه
+        </a>
+        <a href="/admin/gradebook" class="nav-item" data-page="gradebook">
+          <span class="icon">📒</span> دفتر نمرات
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="logout()">🚪 خروج از سیستم</button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <div>
+          <div class="topbar-title">داشبورد تحلیلی عملکرد دانش‌آموزان</div>
+          <p class="topbar-subtitle" id="last-updated">آخرین بروزرسانی: —</p>
+        </div>
+        <button id="refresh-analytics" class="btn btn-outline" type="button">🔄 بروزرسانی داده‌ها</button>
+      </header>
+
+      <main class="page-body">
+        <section class="stats-grid analytics-stats-grid" id="analytics-stats-grid">
+          <article class="stat-card analytics-stat-card" style="--card-index:0;">
+            <div class="stat-icon analytics-icon cyan">👩‍🎓</div>
+            <div class="stat-info">
+              <div class="value" id="stat-total-students">—</div>
+              <div class="label">تعداد کل دانش‌آموزان</div>
+            </div>
+          </article>
+
+          <article class="stat-card analytics-stat-card" style="--card-index:1;">
+            <div class="stat-icon analytics-icon lime">🎯</div>
+            <div class="stat-info">
+              <div class="value" id="stat-average-gpa">—</div>
+              <div class="label">میانگین GPA کل</div>
+            </div>
+          </article>
+
+          <article class="stat-card analytics-stat-card" style="--card-index:2;">
+            <div class="stat-icon analytics-icon amber">⚠️</div>
+            <div class="stat-info">
+              <div class="value" id="stat-at-risk">—</div>
+              <div class="label">دانش‌آموزان نیازمند پشتیبانی</div>
+            </div>
+          </article>
+
+          <article class="stat-card analytics-stat-card" style="--card-index:3;">
+            <div class="stat-icon analytics-icon violet">🧩</div>
+            <div class="stat-info">
+              <div class="value" id="stat-top-weakness">—</div>
+              <div class="label">پرتکرارترین Needs Practice</div>
+            </div>
+          </article>
+
+          <article class="stat-card analytics-stat-card" style="--card-index:4;">
+            <div class="stat-icon analytics-icon cyan">📒</div>
+            <div class="stat-info">
+              <div class="value" id="stat-gradebook-average">—</div>
+              <div class="label">میانگین کارنامه</div>
+            </div>
+          </article>
+        </section>
+
+        <section class="analytics-grid">
+          <article class="card analytics-card">
+            <div class="card-title">🔥 مهم‌ترین ضعف‌های پرتکرار کلاس</div>
+            <ul id="weak-topics-list" class="weak-topic-list">
+              <li class="empty-state">در حال دریافت داده‌های تحلیلی...</li>
+            </ul>
+          </article>
+
+          <article class="card analytics-card">
+            <div class="card-title">📌 راهنمای وضعیت عملکرد</div>
+            <div class="status-guide-grid">
+              <div class="status-guide-item excellent">GPA ≥ 3.5 <span>عالی</span></div>
+              <div class="status-guide-item good">GPA ≥ 2.5 <span>خوب</span></div>
+              <div class="status-guide-item warning">GPA ≥ 1.5 <span>نیاز به توجه</span></div>
+              <div class="status-guide-item danger">GPA &lt; 1.5 <span>بحرانی</span></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="card analytics-card">
+          <div class="card-title">📚 Student Directory + Analytics</div>
+
+          <div class="filter-bar analytics-filter-bar">
+            <div class="filter-item">
+              <label for="student-search">جستجو</label>
+              <input id="student-search" type="text" placeholder="نام دانش‌آموز..." />
+            </div>
+            <div class="filter-item">
+              <label for="grade-filter">پایه تحصیلی</label>
+              <select id="grade-filter">
+                <option value="">همه پایه‌ها</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label for="status-filter">وضعیت</label>
+              <select id="status-filter">
+                <option value="">همه وضعیت‌ها</option>
+                <option value="excellent">عالی</option>
+                <option value="good">خوب</option>
+                <option value="warning">نیاز به توجه</option>
+                <option value="danger">بحرانی</option>
+                <option value="no-data">بدون داده</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>نام دانش‌آموز</th>
+                  <th>پایه</th>
+                  <th>GPA فعلی</th>
+                  <th>تعداد آزمون</th>
+                  <th>وضعیت</th>
+                  <th>تحلیل‌ها</th>
+                </tr>
+              </thead>
+              <tbody id="students-directory-body">
+                <tr>
+                  <td colspan="8" class="empty-state-cell">در حال بارگذاری فهرست دانش‌آموزان...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal-overlay analytics-modal-overlay" id="student-analytics-modal">
+    <div class="modal analytics-modal" role="dialog" aria-modal="true" aria-labelledby="student-modal-title">
+      <div class="modal-title">
+        <div>
+          <h2 id="student-modal-title">پروفایل تحلیلی دانش‌آموز</h2>
+          <p id="student-modal-subtitle">—</p>
+        </div>
+        <button id="close-student-modal" class="modal-close" type="button" aria-label="بستن">✕</button>
+      </div>
+
+      <section id="student-modal-loading" class="modal-feedback">
+        <div class="spinner"></div>
+        <p>در حال دریافت اطلاعات تحلیلی دانش‌آموز...</p>
+      </section>
+
+      <section id="student-modal-error" class="alert alert-error is-hidden"></section>
+
+      <section id="student-modal-content" class="is-hidden">
+        <div class="student-overview-grid">
+          <div class="overview-pill">
+            <span>GPA فعلی</span>
+            <strong id="student-modal-gpa">—</strong>
+          </div>
+          <div class="overview-pill">
+            <span>تعداد آزمون‌ها</span>
+            <strong id="student-modal-total-exams">—</strong>
+          </div>
+          <div class="overview-pill">
+            <span>پایه</span>
+            <strong id="student-modal-grade">—</strong>
+          </div>
+        </div>
+
+        <div class="analytics-block">
+          <h3>📈 روند پیشرفت نمرات (درصد)</h3>
+          <div class="chart-shell">
+            <canvas id="student-progress-chart" height="220"></canvas>
+          </div>
+          <p id="chart-empty-note" class="empty-state is-hidden">برای این دانش‌آموز داده کافی جهت رسم نمودار وجود ندارد.</p>
+        </div>
+
+        <div class="analytics-block">
+          <h3>🧠 Needs Practice / ضعف‌ها</h3>
+          <div id="student-weakness-tags" class="weakness-tags"></div>
+        </div>
+
+        <div class="analytics-block">
+          <h3>📝 تاریخچه کامل آزمون‌ها</h3>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>تاریخ</th>
+                  <th>درس</th>
+                  <th>نمره</th>
+                  <th>درصد</th>
+                </tr>
+              </thead>
+              <tbody id="student-exam-history-body">
+                <tr>
+                  <td colspan="4" class="empty-state-cell">در حال بارگذاری...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+</body>
+</html>

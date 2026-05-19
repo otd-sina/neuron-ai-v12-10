@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تکالیف - نورون</title>
+  <script>
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('neuron-admin-theme');
+        const theme = savedTheme === 'light' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/pages/admin_analytics.css" />
+</head>
+<body class="analytics-page">
+<div class="page-glow glow-one" aria-hidden="true"></div>
+<div class="page-glow glow-two" aria-hidden="true"></div>
+
+<div class="admin-layout" dir="rtl">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>🧠 نورون</h1>
+      <span>پنل مدیریت</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">منو اصلی</div>
+      <a href="/admin/dashboard" class="nav-item" data-page="dashboard"><span class="icon">🏠</span> داشبورد</a>
+      <a href="/admin/students" class="nav-item" data-page="students"><span class="icon">👩‍🎓</span> مدیریت دانش‌آموزان</a>
+      <a href="/admin/classes" class="nav-item" data-page="classes"><span class="icon">🏫</span> مدیریت کلاس‌ها</a>
+      <a href="/admin/assignments" class="nav-item active" data-page="assignments"><span class="icon">📋</span> تکالیف</a>
+      <a href="/admin/create-exam" class="nav-item" data-page="create-exam"><span class="icon">🧪</span> ساخت آزمون مدرسه</a>
+      <a href="/admin/gradebook" class="nav-item" data-page="gradebook"><span class="icon">📒</span> دفتر نمرات</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="logout()">🚪 خروج از سیستم</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-title">📋 مدیریت تکالیف</div>
+      <div class="topbar-user">مدیر سیستم</div>
+    </header>
+
+    <main class="page-body">
+
+      <div class="card">
+        <div class="card-title" style="cursor:pointer;" onclick="toggleAddForm()">
+          ➕ ثبت تکلیف جدید
+          <span id="form-toggle-icon" style="margin-inline-start:auto; font-size:0.85rem; color:var(--text-muted);">▼ نمایش فرم</span>
+        </div>
+        <div id="add-form-wrapper" style="display:none;">
+          <div id="add-error" class="alert alert-error" style="display:none;"></div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>پایه تحصیلی</label>
+              <select id="f-grade" onchange="loadFormClasses()">
+                <option value="">انتخاب پایه...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>کلاس *</label>
+              <select id="f-class">
+                <option value="">ابتدا پایه را انتخاب کنید</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>عنوان تکلیف *</label>
+              <input type="text" id="f-title" placeholder="مثال: تکلیف فصل ۳ ریاضی" />
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>شرح تکلیف *</label>
+              <textarea id="f-desc" rows="5" placeholder="متن کامل تکلیف را اینجا بنویسید. این متن بعداً توسط سیستم هوش مصنوعی برای راهنمایی دانش‌آموزان استفاده می‌شود."></textarea>
+            </div>
+            <div class="form-group">
+              <label>مدت زمان تکلیف *</label>
+              <select id="f-duration">
+                <option value="1">۱ روز</option>
+                <option value="2">۲ روز</option>
+                <option value="3">۳ روز</option>
+                <option value="4">۴ روز</option>
+                <option value="5">۵ روز</option>
+                <option value="6">۶ روز</option>
+                <option value="7">۷ روز</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="submitAddAssignment()">💾 ثبت تکلیف</button>
+            <button class="btn btn-outline" onclick="toggleAddForm()">انصراف</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 فهرست تکالیف</div>
+        <div class="filter-bar">
+          <select id="filter-grade" onchange="onFilterGradeChange()">
+            <option value="">همه پایه‌ها</option>
+          </select>
+          <select id="filter-class" onchange="loadAssignments()">
+            <option value="">همه کلاس‌ها</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="loadAssignments()">🔄 بارگذاری مجدد</button>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>#</th><th>عنوان</th><th>کلاس</th><th>پایه</th><th>تاریخ ثبت</th><th>عملیات</th></tr>
+            </thead>
+            <tbody id="assignments-tbody">
+              <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">در حال بارگذاری...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal">
+    <div class="modal-title">
+      📋 <span id="detail-title">جزئیات تکلیف</span>
+      <button class="modal-close" onclick="closeDetailModal()">✕</button>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>کلاس</label>
+      <div id="detail-class" style="padding:8px 0; font-weight:500;"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>تاریخ ثبت</label>
+      <div id="detail-date" style="padding:8px 0;"></div>
+    </div>
+    <div class="form-group">
+      <label>شرح تکلیف</label>
+      <div id="detail-desc" style="background:var(--surface-alt); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; line-height:1.8; white-space:pre-wrap; margin-top:4px;"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeDetailModal()">بستن</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="/static/js/common.js"></script>
+<script>
+  checkAuth();
+
+  let allGrades  = [];
+  let allClasses = [];
+
+  async function loadGradesAndClasses() {
+    const [gRes, cRes] = await Promise.all([
+      fetch('/api/grades'),
+      fetch('/api/classes'),
+    ]);
+    allGrades  = (await gRes.json()).grades  || [];
+    allClasses = (await cRes.json()).classes || [];
+
+    ['f-grade', 'filter-grade'].forEach(id => {
+      const sel = document.getElementById(id);
+      const placeholder = sel.options[0].text;
+      sel.innerHTML = `<option value="">${placeholder}</option>`;
+      allGrades.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g.id;
+        opt.textContent = g.name;
+        sel.appendChild(opt);
+      });
+    });
+  }
+
+  function populateClassSelect(gradeId, selectId, placeholder = 'انتخاب کلاس...') {
+    const sel = document.getElementById(selectId);
+    const filtered = gradeId ? allClasses.filter(c => c.grade_id == gradeId) : allClasses;
+    sel.innerHTML = `<option value="">${placeholder}</option>`;
+    filtered.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name;
+      sel.appendChild(opt);
+    });
+  }
+
+  function loadFormClasses() {
+    populateClassSelect(document.getElementById('f-grade').value, 'f-class', 'انتخاب کلاس...');
+  }
+
+  function onFilterGradeChange() {
+    populateClassSelect(document.getElementById('filter-grade').value, 'filter-class', 'همه کلاس‌ها');
+    loadAssignments();
+  }
+
+  function toggleAddForm() {
+    const wrapper = document.getElementById('add-form-wrapper');
+    const icon = document.getElementById('form-toggle-icon');
+    if (wrapper.style.display === 'none') {
+      wrapper.style.display = 'block';
+      icon.textContent = '▲ بستن فرم';
+    } else {
+      wrapper.style.display = 'none';
+      icon.textContent = '▼ نمایش فرم';
+    }
+  }
+
+  async function loadAssignments() {
+    const classId = document.getElementById('filter-class').value;
+    let url = '/api/assignments?';
+    if (classId) url += `class_id=${classId}&`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      const assignments = data.assignments || [];
+      const tbody = document.getElementById('assignments-tbody');
+      if (assignments.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">هیچ تکلیفی یافت نشد.</td></tr>';
+        return;
+      }
+      const gradeMap = Object.fromEntries(allGrades.map(g => [g.id, g.name]));
+      const classMap = Object.fromEntries(allClasses.map(c => [c.id, { name: c.name, grade_id: c.grade_id }]));
+      tbody.innerHTML = assignments.map(a => {
+        const cls   = classMap[a.class_id] || {};
+        const grade = gradeMap[cls.grade_id] || '—';
+        return `
+          <tr>
+            <td>${a.id}</td>
+            <td><strong>${a.title}</strong></td>
+            <td><span class="badge badge-green">${cls.name || 'کلاس '+a.class_id}</span></td>
+            <td><span class="badge badge-blue">${grade}</span></td>
+            <td>${new Date(a.created_at).toLocaleDateString('fa-IR')}</td>
+            <td>
+              <button class="btn btn-outline btn-sm" onclick="showDetail(${a.id})">👁️ مشاهده</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteAssignment(${a.id})">حذف تکلیف</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } catch {
+      showToast('خطا در بارگذاری تکالیف', 'error');
+    }
+  }
+
+  async function submitAddAssignment() {
+    const classId = document.getElementById('f-class').value;
+    const title   = document.getElementById('f-title').value.trim();
+    const desc    = document.getElementById('f-desc').value.trim();
+    const duration = parseInt(document.getElementById('f-duration').value);
+    const errEl   = document.getElementById('add-error');
+
+    if (!classId || !title || !desc || !duration) {
+      errEl.textContent = 'لطفاً تمام فیلدها را پر کنید.';
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+    try {
+      const res = await fetch('/api/assignments', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ class_id: parseInt(classId), title, description: desc, duration_days: duration }),
+      });
+      if (res.ok) {
+        showToast('تکلیف با موفقیت ثبت شد ✅');
+        document.getElementById('f-class').value = '';
+        document.getElementById('f-title').value = '';
+        document.getElementById('f-desc').value  = '';
+        document.getElementById('f-duration').value = '1';
+        toggleAddForm();
+        loadAssignments();
+      } else {
+        const data = await res.json();
+        errEl.textContent = data.message || 'خطا در ثبت تکلیف';
+        errEl.style.display = 'block';
+      }
+    } catch {
+      errEl.textContent = 'خطا در ارتباط با سرور';
+      errEl.style.display = 'block';
+    }
+  }
+
+  async function showDetail(assignmentId) {
+    try {
+      const res = await fetch(`/api/assignments/${assignmentId}`);
+      const data = await res.json();
+      const a = data.assignment;
+      const classMap = Object.fromEntries(allClasses.map(c => [c.id, c.name]));
+      document.getElementById('detail-title').textContent = a.title;
+      document.getElementById('detail-class').textContent = classMap[a.class_id] || 'کلاس ' + a.class_id;
+      document.getElementById('detail-date').textContent  = new Date(a.created_at).toLocaleDateString('fa-IR');
+      document.getElementById('detail-desc').textContent  = a.description;
+      document.getElementById('detail-modal').classList.add('open');
+    } catch {
+      showToast('خطا در بارگذاری تکلیف', 'error');
+    }
+  }
+
+  async function deleteAssignment(assignmentId) {
+    if (!confirm('آیا از حذف این تکلیف مطمئن هستید؟')) return;
+    try {
+      const res = await fetch(`/api/assignments/${assignmentId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json();
+        showToast(data.message || 'حذف تکلیف انجام نشد', 'error');
+        return;
+      }
+      showToast('تکلیف حذف شد ✅');
+      closeDetailModal();
+      await loadAssignments();
+    } catch {
+      showToast('خطا در حذف تکلیف', 'error');
+    }
+  }
+
+  function closeDetailModal() {
+    document.getElementById('detail-modal').classList.remove('open');
+  }
+
+  (async () => {
+    await loadGradesAndClasses();
+    await loadAssignments();
+  })();
+</script>
+</body>
+</html>

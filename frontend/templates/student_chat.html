@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>گفت‌وگوی آموزشی - نورون</title>
+  <link rel="stylesheet" href="/static/css/student.css" />
+</head>
+<body class="student-page chat-page" data-nav-page="tutor">
+  <div class="bg-orb orb-one"></div>
+  <div class="bg-orb orb-two"></div>
+
+  <header class="student-header chat-header" id="chat-header">
+    <button id="back-to-bots" class="btn-secondary chat-back-btn" type="button">بازگشت</button>
+    <h1 id="chat-title" class="chat-inline-title">درس | Smart Tutor</h1>
+  </header>
+
+  <main class="chat-shell">
+    <section id="chat-alert" class="alert error hidden" role="alert"></section>
+
+    <section id="chat-messages" class="chat-messages glass-card" aria-live="polite"></section>
+
+    <section id="typing-indicator" class="typing-indicator glass-card hidden">
+      <span></span>
+      <span></span>
+      <span></span>
+      <p>در حال پاسخ‌گویی...</p>
+    </section>
+
+    <section id="exam-panel" class="glass-card exam-panel hidden">
+      <h2>تنظیمات آزمون تمرینی</h2>
+      <div class="exam-controls">
+        <label class="exam-field">
+          <span>سطح سختی</span>
+          <select id="exam-difficulty">
+            <option value="easy">آسان</option>
+            <option value="medium" selected>متوسط</option>
+            <option value="hard">سخت</option>
+          </select>
+        </label>
+        <label class="exam-field">
+          <span>تعداد سوال</span>
+          <input id="exam-count" type="number" min="3" max="20" value="10" />
+        </label>
+      </div>
+      <div class="exam-actions">
+        <button id="start-exam-button" class="btn-primary exam-start-btn" type="button">شروع آزمون</button>
+        <p id="exam-panel-note" class="muted">برای شروع آزمون، تنظیمات را انتخاب کن.</p>
+      </div>
+    </section>
+
+    <section id="exam-content" class="glass-card exam-content hidden"></section>
+  </main>
+
+  <form id="chat-form" class="chat-input-wrap glass-card" autocomplete="off">
+    <label for="chat-input" class="sr-only">متن پیام</label>
+    <input id="chat-input" type="text" maxlength="1000" placeholder="پیام خود را بنویسید..." required />
+    <button id="retry-button" class="btn-secondary retry-btn hidden" type="button">تلاش دوباره</button>
+    <button id="chat-send" class="btn-primary send-btn" type="submit" aria-label="ارسال پیام">➤</button>
+  </form>
+
+  <script src="/static/js/student_chat.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+.glass-card {
+  background: var(--card-bg-idle);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--card-blur-idle));
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  transition:
+    transform var(--hover-duration) var(--hover-easing),
+    box-shadow var(--hover-duration) var(--hover-easing),
+    backdrop-filter var(--hover-duration) var(--hover-easing),
+    background var(--hover-duration) var(--hover-easing),
+    color var(--hover-duration) var(--hover-easing);
+}
+
+.dashboard-card {
+  position: relative;
+  overflow: hidden;
+  will-change: transform, opacity;
+}
+
+@media (hover: hover) {
+  .dashboard-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    background: var(--card-bg-hover);
+    backdrop-filter: blur(var(--card-blur-hover));
+    box-shadow: var(--card-hover-shadow);
+  }
+
+  .dashboard-card:hover::after {
+    animation: flash-sweep var(--flash-duration) var(--hover-easing) 1;
+  }
+
+  .dashboard-card:hover h2,
+  .dashboard-card:hover p,
+  .dashboard-card:hover strong {
+    color: var(--text-bright);
+    text-shadow: 0 8px 22px rgba(7, 11, 29, 0.5);
+  }
+}

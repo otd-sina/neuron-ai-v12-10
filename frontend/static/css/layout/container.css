@@ -1,0 +1,23 @@
+.auth-shell {
+  min-height: calc(100vh - 48px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-shell {
+  max-width: 1100px;
+  margin: 14px auto 18px;
+}
+
+.list-page-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .dashboard-shell {
+    margin: 18px auto 24px;
+  }
+}

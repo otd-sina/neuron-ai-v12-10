@@ -1,0 +1,32 @@
+@import url("./base/reset.css");
+@import url("./base/fonts.css");
+@import url("./base/variables.css");
+@import url("./base/typography.css");
+@import url("./base/base.css");
+
+@import url("./layout/grid.css");
+@import url("./layout/container.css");
+@import url("./layout/spacing.css");
+
+@import url("./components/card.css");
+@import url("./components/button.css");
+@import url("./components/input.css");
+@import url("./components/navbar.css");
+@import url("./components/sidebar.css");
+@import url("./components/badge.css");
+
+@import url("./pages/login.css");
+@import url("./pages/dashboard.css");
+@import url("./pages/chat.css");
+@import url("./pages/about.css");
+@import url("./pages/student_flow.css");
+@import url("./pages/profile.css");
+
+@import url("./animations/keyframes.css");
+@import url("./animations/transitions.css");
+@import url("./animations/effects.css");
+
+@import url("./utilities/colors.css");
+@import url("./utilities/display.css");
+@import url("./utilities/accessibility.css");
+@import url("./utilities/responsive.css");

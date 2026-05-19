@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>دفتر نمرات - نورون</title>
+  <script>
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('neuron-admin-theme');
+        const theme = savedTheme === 'light' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/pages/admin_analytics.css" />
+  <link rel="stylesheet" href="/static/css/pages/gradebook.css" />
+</head>
+<body class="analytics-page gradebook-page">
+  <div class="page-glow glow-one" aria-hidden="true"></div>
+  <div class="page-glow glow-two" aria-hidden="true"></div>
+
+  <div class="admin-layout" dir="rtl">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <h1>🧠 نورون</h1>
+        <span>پنل مدیریت</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">منو اصلی</div>
+        <a href="/admin/dashboard" class="nav-item" data-page="dashboard"><span class="icon">📊</span> داشبورد تحلیلی</a>
+        <a href="/admin/students" class="nav-item" data-page="students"><span class="icon">👩‍🎓</span> مدیریت دانش‌آموزان</a>
+        <a href="/admin/classes" class="nav-item" data-page="classes"><span class="icon">🏫</span> مدیریت کلاس‌ها</a>
+        <a href="/admin/assignments" class="nav-item" data-page="assignments"><span class="icon">📋</span> تکالیف</a>
+        <a href="/admin/create-exam" class="nav-item" data-page="create-exam"><span class="icon">🧪</span> ساخت آزمون مدرسه</a>
+        <a href="/admin/gradebook" class="nav-item active" data-page="gradebook"><span class="icon">📒</span> دفتر نمرات</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="logout()">🚪 خروج از سیستم</button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <div>
+          <div class="topbar-title">📒 سیستم دفتر نمرات مجازی</div>
+          <p class="topbar-subtitle">ثبت نمره، حضور و غیاب استثنایی، مشارکت کلاسی و گزارش‌کارنامه یکپارچه</p>
+        </div>
+        <button id="gradebook-refresh-overview" class="btn btn-outline" type="button">🔄 بروزرسانی تحلیل</button>
+      </header>
+
+      <main class="page-body">
+        <section class="stats-grid analytics-stats-grid gradebook-stats-grid">
+          <article class="stat-card analytics-stat-card" style="--card-index:0;">
+            <div class="stat-icon analytics-icon cyan">📈</div>
+            <div class="stat-info">
+              <div class="value" id="gb-stat-average">—</div>
+              <div class="label">میانگین کل نمرات</div>
+            </div>
+          </article>
+          <article class="stat-card analytics-stat-card" style="--card-index:1;">
+            <div class="stat-icon analytics-icon lime">🟢</div>
+            <div class="stat-info">
+              <div class="value" id="gb-stat-attendance">—</div>
+              <div class="label">نرخ حضور</div>
+            </div>
+          </article>
+          <article class="stat-card analytics-stat-card" style="--card-index:2;">
+            <div class="stat-icon analytics-icon amber">🙋</div>
+            <div class="stat-info">
+              <div class="value" id="gb-stat-participation">—</div>
+              <div class="label">میانگین مشارکت</div>
+            </div>
+          </article>
+          <article class="stat-card analytics-stat-card" style="--card-index:3;">
+            <div class="stat-icon analytics-icon violet">🧾</div>
+            <div class="stat-info">
+              <div class="value" id="gb-stat-record-count">—</div>
+              <div class="label">تعداد رکورد نمره</div>
+            </div>
+          </article>
+        </section>
+
+        <section class="card analytics-card">
+          <div class="card-title">➕ ثبت نمره جدید</div>
+          <p id="grade-form-mode" class="gradebook-inline-note">در حالت ثبت نمره جدید هستید.</p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="grade-form-grade">پایه</label>
+              <select id="grade-form-grade"></select>
+            </div>
+            <div class="form-group">
+              <label for="grade-form-class">کلاس *</label>
+              <select id="grade-form-class"></select>
+            </div>
+            <div class="form-group">
+              <label for="grade-form-student">دانش‌آموز *</label>
+              <select id="grade-form-student"></select>
+            </div>
+            <div class="form-group">
+              <label for="grade-form-subject">درس *</label>
+              <input id="grade-form-subject" type="text" placeholder="مثال: ریاضی" />
+            </div>
+            <div class="form-group">
+              <label for="grade-form-type">نوع ارزیابی</label>
+              <select id="grade-form-type">
+                <option value="quiz">Quiz</option>
+                <option value="exam">Exam</option>
+                <option value="assignment">Assignment</option>
+                <option value="project">Project</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="grade-form-title">عنوان ارزیابی *</label>
+              <input id="grade-form-title" type="text" placeholder="مثال: آزمون فصل 2" />
+            </div>
+            <div class="form-group">
+              <label for="grade-form-score">نمره کسب‌شده *</label>
+              <input id="grade-form-score" type="number" min="0" step="0.01" placeholder="16.5" />
+            </div>
+            <div class="form-group">
+              <label for="grade-form-max-score">حداکثر نمره *</label>
+              <input id="grade-form-max-score" type="number" min="0.1" step="0.01" value="20" />
+            </div>
+            <div class="form-group">
+              <label for="grade-form-weight">وزن</label>
+              <input id="grade-form-weight" type="number" min="0.1" step="0.1" value="1" />
+            </div>
+            <div class="form-group">
+              <label for="grade-form-recorded-date">تاریخ ثبت</label>
+              <input id="grade-form-recorded-date" type="date" />
+            </div>
+            <div class="form-group">
+              <label for="grade-form-term">ترم/دوره</label>
+              <input id="grade-form-term" type="text" placeholder="مثال: نیمسال اول" />
+            </div>
+            <div class="form-group full-span">
+              <label for="grade-form-notes">توضیحات</label>
+              <textarea id="grade-form-notes" rows="3" placeholder="اختیاری"></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button id="grade-form-cancel" class="btn btn-outline" type="button">✖️ لغو ویرایش</button>
+            <button id="grade-form-submit" class="btn btn-primary" type="button">💾 ثبت نمره</button>
+          </div>
+        </section>
+
+        <section class="card analytics-card">
+          <div class="card-title">📚 مدیریت نمرات ثبت‌شده</div>
+          <div class="filter-bar">
+            <select id="records-filter-grade"></select>
+            <select id="records-filter-class"></select>
+            <select id="records-filter-student"></select>
+            <input id="records-filter-subject" type="text" placeholder="فیلتر درس" />
+            <button id="records-filter-refresh" class="btn btn-outline btn-sm" type="button">🔎 نمایش</button>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>تاریخ</th>
+                  <th>دانش‌آموز</th>
+                  <th>درس</th>
+                  <th>نوع</th>
+                  <th>عنوان</th>
+                  <th>نمره</th>
+                  <th>درصد</th>
+                  <th>وزن</th>
+                  <th>عملیات</th>
+                </tr>
+              </thead>
+              <tbody id="grade-records-body">
+                <tr><td colspan="10" class="empty-state-cell">در حال بارگذاری داده‌ها...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card analytics-card">
+          <div class="card-title">🗓️ حضور و غیاب (مدل استثنایی)</div>
+          <p class="gradebook-inline-note">پیش‌فرض همه دانش‌آموزان «حاضر» است. فقط غایب/تاخیر/خروج زودهنگام/موجه را تغییر دهید و سپس ذخیره کنید.</p>
+          <div class="filter-bar">
+            <select id="attendance-class"></select>
+            <input id="attendance-date" type="date" />
+            <button id="attendance-load" class="btn btn-outline btn-sm" type="button">📥 بارگذاری کلاس</button>
+          </div>
+          <p id="attendance-summary" class="gradebook-summary-line">—</p>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>نام دانش‌آموز</th>
+                  <th>کد ملی</th>
+                  <th>وضعیت</th>
+                  <th>توضیح</th>
+                </tr>
+              </thead>
+              <tbody id="attendance-body">
+                <tr><td colspan="5" class="empty-state-cell">کلاس را انتخاب کنید.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="form-actions">
+            <button id="attendance-save" class="btn btn-primary" type="button">💾 ذخیره حضور و غیاب کلاس</button>
+          </div>
+        </section>
+
+        <section class="card analytics-card">
+          <div class="card-title">🙋 ثبت مشارکت کلاسی</div>
+          <div class="filter-bar">
+            <select id="participation-class"></select>
+            <input id="participation-date" type="date" />
+            <button id="participation-load" class="btn btn-outline btn-sm" type="button">📥 بارگذاری کلاس</button>
+          </div>
+          <p id="participation-summary" class="gradebook-summary-line">—</p>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>نام دانش‌آموز</th>
+                  <th>امتیاز مشارکت (0 تا 5)</th>
+                  <th>یادداشت</th>
+                </tr>
+              </thead>
+              <tbody id="participation-body">
+                <tr><td colspan="4" class="empty-state-cell">کلاس را انتخاب کنید.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="form-actions">
+            <button id="participation-save" class="btn btn-primary" type="button">💾 ذخیره مشارکت کلاس</button>
+          </div>
+        </section>
+
+        <section class="gradebook-split-grid">
+          <article class="card analytics-card">
+            <div class="card-title">🧑‍🎓 کارنامه دانش‌آموز</div>
+            <div class="filter-bar">
+              <select id="report-class"></select>
+              <select id="report-student"></select>
+              <button id="report-load" class="btn btn-outline btn-sm" type="button">📄 نمایش کارنامه</button>
+            </div>
+            <div class="gradebook-summary-pills">
+              <div class="gradebook-pill"><span>میانگین نمره</span><strong id="report-average">—</strong></div>
+              <div class="gradebook-pill"><span>نرخ حضور</span><strong id="report-attendance">—</strong></div>
+              <div class="gradebook-pill"><span>میانگین مشارکت</span><strong id="report-participation">—</strong></div>
+              <div class="gradebook-pill"><span>وضعیت عملکرد</span><strong id="report-band">—</strong></div>
+            </div>
+
+            <h3 class="gradebook-table-title">عملکرد دروس</h3>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>درس</th>
+                    <th>تعداد ارزیابی</th>
+                    <th>میانگین درصد</th>
+                  </tr>
+                </thead>
+                <tbody id="report-subject-body">
+                  <tr><td colspan="3" class="empty-state-cell">دانش‌آموز را انتخاب کنید.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3 class="gradebook-table-title">ارزیابی‌های اخیر</h3>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>تاریخ</th>
+                    <th>درس</th>
+                    <th>عنوان</th>
+                    <th>نمره</th>
+                    <th>درصد</th>
+                  </tr>
+                </thead>
+                <tbody id="report-recent-body">
+                  <tr><td colspan="5" class="empty-state-cell">دانش‌آموز را انتخاب کنید.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="card analytics-card">
+            <div class="card-title">🏫 تحلیل عملکرد کلاس</div>
+            <div class="filter-bar">
+              <select id="class-analytics-class"></select>
+              <button id="class-analytics-load" class="btn btn-outline btn-sm" type="button">📊 نمایش تحلیل کلاس</button>
+            </div>
+            <div class="gradebook-summary-pills">
+              <div class="gradebook-pill"><span>میانگین نمره کلاس</span><strong id="class-avg-grade">—</strong></div>
+              <div class="gradebook-pill"><span>میانگین حضور</span><strong id="class-avg-attendance">—</strong></div>
+              <div class="gradebook-pill"><span>میانگین مشارکت</span><strong id="class-avg-participation">—</strong></div>
+              <div class="gradebook-pill"><span>تعداد دانش‌آموز</span><strong id="class-total-students">—</strong></div>
+            </div>
+
+            <h3 class="gradebook-table-title">برترین دانش‌آموزان</h3>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr><th>نام</th><th>میانگین</th><th>حضور</th></tr>
+                </thead>
+                <tbody id="class-top-body">
+                  <tr><td colspan="3" class="empty-state-cell">کلاس را انتخاب کنید.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3 class="gradebook-table-title">دانش‌آموزان نیازمند پشتیبانی</h3>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr><th>نام</th><th>میانگین</th><th>حضور</th></tr>
+                </thead>
+                <tbody id="class-risk-body">
+                  <tr><td colspan="3" class="empty-state-cell">کلاس را انتخاب کنید.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3 class="gradebook-table-title">میانگین دروس کلاس</h3>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr><th>درس</th><th>تعداد ارزیابی</th><th>میانگین درصد</th></tr>
+                </thead>
+                <tbody id="class-subject-body">
+                  <tr><td colspan="3" class="empty-state-cell">کلاس را انتخاب کنید.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="/static/js/common.js"></script>
+  <script src="/static/js/gradebook.js"></script>
+</body>
+</html>

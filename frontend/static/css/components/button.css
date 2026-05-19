@@ -1,0 +1,49 @@
+.btn-primary,
+.btn-danger,
+.btn-secondary {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  color: #fff;
+  font-size: 1rem;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.btn-primary {
+  margin-top: 22px;
+  background: linear-gradient(120deg, var(--primary-dark), var(--primary));
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(14, 189, 156, 0.35);
+}
+
+.btn-danger {
+  width: auto;
+  min-width: 96px;
+  background: linear-gradient(120deg, var(--danger-dark), var(--danger));
+}
+
+.btn-danger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(255, 109, 145, 0.35);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.95rem;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.text-button {
+  margin-top: 14px;
+  background: transparent;
+  color: #dce7ff;
+  text-decoration: underline;
+}

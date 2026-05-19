@@ -1,0 +1,45 @@
+:root {
+  --bg-start: #070b1d;
+  --bg-mid: #101a39;
+  --bg-end: #1c1140;
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --text: #f3f8ff;
+  --muted: #bfd0f8;
+  --primary: #4de0c1;
+  --primary-dark: #0f997e;
+  --danger: #ff6d91;
+  --danger-dark: #d74f73;
+  --shadow: 0 20px 55px rgba(0, 0, 0, 0.3);
+  --text-bright: #ffffff;
+  --card-bg-idle: rgba(255, 255, 255, 0.1);
+  --card-bg-hover: rgba(168, 85, 247, 0.15);
+  --card-blur-idle: 10px;
+  --card-blur-hover: 5px;
+  --card-hover-shadow: 0 26px 62px rgba(102, 43, 180, 0.52);
+
+  --entry-duration: 500ms;
+  --entry-stagger: 80ms;
+  --entry-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --hover-duration: 300ms;
+  --hover-easing: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --neon-start: #a855f7;
+  --neon-end: #c084fc;
+  --neon-duration: 3s;
+  --neon-blur: 2px;
+  --flash-duration: 600ms;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-full: 999px;
+}

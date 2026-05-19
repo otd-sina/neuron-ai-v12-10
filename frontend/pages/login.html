@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ورود به پنل مدیریت - نورون</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-box">
+      <div class="login-logo">
+        <div class="brand">🧠 نورون</div>
+        <div class="subtitle">پلتفرم آموزشی هوشمند</div>
+      </div>
+
+      <div id="error-msg" class="alert alert-error" style="display:none;"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">نام کاربری</label>
+          <input type="text" id="username" name="username" placeholder="نام کاربری را وارد کنید" autocomplete="username" required />
+        </div>
+        <div class="form-group">
+          <label for="password">رمز عبور</label>
+          <input type="password" id="password" name="password" placeholder="رمز عبور را وارد کنید" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-login" id="login-btn">
+          <span id="btn-text">ورود به سیستم</span>
+        </button>
+      </form>
+
+      <p style="text-align:center; margin-top:20px; font-size:0.78rem; color:#94a3b8;">
+        پنل مدیریت نورون &mdash; نسخه ۱.۰
+      </p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      const btnText = document.getElementById('btn-text');
+      const errorMsg = document.getElementById('error-msg');
+
+      btn.disabled = true;
+      btnText.textContent = 'در حال ورود...';
+      errorMsg.style.display = 'none';
+
+      const formData = new FormData();
+      formData.append('username', document.getElementById('username').value);
+      formData.append('password', document.getElementById('password').value);
+
+      try {
+        const res = await fetch('/api/auth/login', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          window.location.href = '/admin/dashboard';
+        } else {
+          errorMsg.textContent = data.message || 'خطا در ورود. لطفاً دوباره تلاش کنید.';
+          errorMsg.style.display = 'block';
+        }
+      } catch {
+        errorMsg.textContent = 'خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.';
+        errorMsg.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = 'ورود به سیستم';
+      }
+    });
+  </script>
+</body>
+</html>

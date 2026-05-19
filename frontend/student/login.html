@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ورود دانش‌آموز - نورون</title>
+  <link rel="stylesheet" href="/static/css/student.css" />
+</head>
+<body class="student-page auth-page">
+  <div class="bg-orb orb-one"></div>
+  <div class="bg-orb orb-two"></div>
+
+  <main class="auth-shell">
+    <section class="glass-card auth-card">
+      <p class="chip">پرتال دانش‌آموزی نورون</p>
+      <h1>ورود به سیستم نورون</h1>
+      <p class="muted">برای ورود، کد ملی و رمز عبور خودت را وارد کن.</p>
+
+      <div id="auth-error" class="alert error hidden" role="alert"></div>
+
+      <form id="student-login-form" novalidate>
+        <div class="form-group">
+          <label for="national-id">کد ملی</label>
+          <input
+            id="national-id"
+            name="national_id"
+            type="text"
+            inputmode="numeric"
+            maxlength="10"
+            placeholder="کد ملی ۱۰ رقمی"
+            autocomplete="username"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">رمز عبور</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            minlength="6"
+            placeholder="رمز عبور"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+
+        <button id="login-button" class="btn-primary" type="submit">
+          <span id="login-button-text">ورود</span>
+          <span id="login-spinner" class="spinner hidden" aria-hidden="true"></span>
+        </button>
+      </form>
+
+      <button id="forgot-password" class="text-button" type="button">فراموشی رمز عبور؟</button>
+    </section>
+  </main>
+
+  <script src="/static/js/auth.js"></script>
+</body>
+</html>

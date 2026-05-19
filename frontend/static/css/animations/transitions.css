@@ -1,0 +1,7 @@
+.transition-fast {
+  transition: all 0.15s ease;
+}
+
+.transition-normal {
+  transition: all 0.25s ease;
+}

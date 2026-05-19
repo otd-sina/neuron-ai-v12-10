@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مدیریت دانش‌آموزان - نورون</title>
+  <script>
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('neuron-admin-theme');
+        const theme = savedTheme === 'light' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/pages/admin_analytics.css" />
+</head>
+<body class="analytics-page">
+<div class="page-glow glow-one" aria-hidden="true"></div>
+<div class="page-glow glow-two" aria-hidden="true"></div>
+
+<div class="admin-layout" dir="rtl">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>🧠 نورون</h1>
+      <span>پنل مدیریت</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">منو اصلی</div>
+      <a href="/admin/dashboard" class="nav-item" data-page="dashboard">
+        <span class="icon">🏠</span> داشبورد
+      </a>
+      <a href="/admin/students" class="nav-item active" data-page="students">
+        <span class="icon">👩‍🎓</span> مدیریت دانش‌آموزان
+      </a>
+      <a href="/admin/classes" class="nav-item" data-page="classes">
+        <span class="icon">🏫</span> مدیریت کلاس‌ها
+      </a>
+      <a href="/admin/assignments" class="nav-item" data-page="assignments">
+        <span class="icon">📋</span> تکالیف
+      </a>
+      <a href="/admin/create-exam" class="nav-item" data-page="create-exam">
+        <span class="icon">🧪</span> ساخت آزمون مدرسه
+      </a>
+      <a href="/admin/gradebook" class="nav-item" data-page="gradebook"><span class="icon">📒</span> دفتر نمرات</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="logout()">🚪 خروج از سیستم</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-title">👩‍🎓 مدیریت دانش‌آموزان</div>
+      <div class="topbar-user">مدیر سیستم</div>
+    </header>
+
+    <main class="page-body">
+
+      <!-- Add student form -->
+      <div class="card">
+        <div class="card-title" style="cursor:pointer;" onclick="toggleAddForm()">
+          ➕ افزودن دانش‌آموز جدید
+          <span id="form-toggle-icon" style="margin-inline-start:auto; font-size:0.85rem; color:var(--text-muted);">▼ نمایش فرم</span>
+        </div>
+        <div id="add-form-wrapper" style="display:none;">
+          <div id="add-error" class="alert alert-error" style="display:none;"></div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>نام و نام خانوادگی *</label>
+              <input type="text" id="f-name" placeholder="مثال: علی احمدی" />
+            </div>
+            <div class="form-group">
+              <label>کد ملی *</label>
+              <input type="text" id="f-nid" placeholder="۱۰ رقمی" maxlength="10" />
+            </div>
+            <div class="form-group">
+              <label>شماره تماس *</label>
+              <input type="text" id="f-phone" placeholder="مثال: ۰۹۱۲۱۲۳۴۵۶۷" />
+            </div>
+            <div class="form-group">
+              <label>مدرسه</label>
+              <input type="text" id="f-school" placeholder="اختیاری" />
+            </div>
+            <div class="form-group">
+              <label>رمز عبور *</label>
+              <input type="password" id="f-pass" placeholder="حداقل ۶ کاراکتر" />
+            </div>
+            <div class="form-group">
+              <label>پایه تحصیلی *</label>
+              <select id="f-grade">
+                <option value="">انتخاب پایه...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>کلاس *</label>
+              <select id="f-class">
+                <option value="">ابتدا پایه را انتخاب کنید</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="submitAddStudent()">💾 ذخیره دانش‌آموز</button>
+            <button class="btn btn-outline" onclick="toggleAddForm()">انصراف</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter + list -->
+      <div class="card">
+        <div class="card-title">📋 فهرست دانش‌آموزان</div>
+        <div class="filter-bar">
+          <select id="filter-grade" onchange="onFilterGradeChange()">
+            <option value="">همه پایه‌ها</option>
+          </select>
+          <select id="filter-class" onchange="loadStudents()">
+            <option value="">همه کلاس‌ها</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="loadStudents()">🔄 بارگذاری مجدد</button>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>نام کامل</th>
+                <th>کد ملی</th>
+                <th>شماره تماس</th>
+                <th>مدرسه</th>
+                <th>پایه</th>
+                <th>کلاس</th>
+                <th>تاریخ ثبت</th>
+                <th>عملیات</th>
+              </tr>
+            </thead>
+            <tbody id="students-tbody">
+              <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-muted);">در حال بارگذاری...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title">
+      ✏️ ویرایش دانش‌آموز
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div id="edit-error" class="alert alert-error" style="display:none;"></div>
+    <input type="hidden" id="edit-id" />
+    <div class="form-grid">
+      <div class="form-group">
+        <label>نام و نام خانوادگی</label>
+        <input type="text" id="edit-name" />
+      </div>
+      <div class="form-group">
+        <label>کد ملی</label>
+        <input type="text" id="edit-nid" />
+      </div>
+      <div class="form-group">
+        <label>شماره تماس</label>
+        <input type="text" id="edit-phone" />
+      </div>
+      <div class="form-group">
+        <label>مدرسه</label>
+        <input type="text" id="edit-school" placeholder="اختیاری" />
+      </div>
+      <div class="form-group">
+        <label>رمز عبور جدید (اختیاری)</label>
+        <input type="password" id="edit-pass" placeholder="خالی بگذارید تا تغییر نکند" />
+      </div>
+      <div class="form-group">
+        <label>پایه تحصیلی</label>
+        <select id="edit-grade" onchange="loadEditClasses()">
+          <option value="">انتخاب پایه...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>کلاس</label>
+        <select id="edit-class">
+          <option value="">انتخاب کلاس...</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="submitEditStudent()">💾 ذخیره تغییرات</button>
+      <button class="btn btn-outline" onclick="closeEditModal()">انصراف</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="/static/js/common.js"></script>
+<script>
+  checkAuth();
+
+  let allGrades = [];
+  let allClasses = [];
+
+  function toggleAddForm() {
+    const wrapper = document.getElementById('add-form-wrapper');
+    const icon = document.getElementById('form-toggle-icon');
+    if (wrapper.style.display === 'none') {
+      wrapper.style.display = 'block';
+      icon.textContent = '▲ بستن فرم';
+    } else {
+      wrapper.style.display = 'none';
+      icon.textContent = '▼ نمایش فرم';
+    }
+  }
+
+  async function loadGradesAndClasses() {
+    const [gRes, cRes] = await Promise.all([
+      fetch('/api/grades'),
+      fetch('/api/classes'),
+    ]);
+    allGrades  = (await gRes.json()).grades  || [];
+    allClasses = (await cRes.json()).classes || [];
+
+    const selectors = ['f-grade', 'filter-grade', 'edit-grade'];
+    selectors.forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const current = sel.value;
+      const placeholder = sel.options[0].text;
+      sel.innerHTML = `<option value="">${placeholder}</option>`;
+      allGrades.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g.id;
+        opt.textContent = g.name;
+        sel.appendChild(opt);
+      });
+      if (current) sel.value = current;
+    });
+  }
+
+  function populateClassSelect(gradeId, selectId, currentClassId = '') {
+    const sel = document.getElementById(selectId);
+    const filtered = gradeId ? allClasses.filter(c => c.grade_id == gradeId) : allClasses;
+    sel.innerHTML = '<option value="">انتخاب کلاس...</option>';
+    filtered.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name;
+      sel.appendChild(opt);
+    });
+    if (currentClassId) sel.value = currentClassId;
+  }
+
+  document.getElementById('f-grade').addEventListener('change', function() {
+    populateClassSelect(this.value, 'f-class');
+  });
+
+  async function onFilterGradeChange() {
+    const gradeId = document.getElementById('filter-grade').value;
+    const sel = document.getElementById('filter-class');
+    const filtered = gradeId ? allClasses.filter(c => c.grade_id == gradeId) : allClasses;
+    sel.innerHTML = '<option value="">همه کلاس‌ها</option>';
+    filtered.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name;
+      sel.appendChild(opt);
+    });
+    await loadStudents();
+  }
+
+  async function loadStudents() {
+    const gradeId = document.getElementById('filter-grade').value;
+    const classId = document.getElementById('filter-class').value;
+    let url = '/api/students?';
+    if (gradeId) url += `grade_id=${gradeId}&`;
+    if (classId) url += `class_id=${classId}&`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      const students = data.students || [];
+      const tbody = document.getElementById('students-tbody');
+      if (students.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-muted);">هیچ دانش‌آموزی یافت نشد.</td></tr>';
+        return;
+      }
+      const gradeMap = Object.fromEntries(allGrades.map(g => [g.id, g.name]));
+      const classMap = Object.fromEntries(allClasses.map(c => [c.id, c.name]));
+      tbody.innerHTML = students.map(s => `
+        <tr>
+          <td>${s.id}</td>
+          <td><strong>${s.full_name}</strong></td>
+          <td><span class="badge badge-gray">${s.national_id}</span></td>
+          <td>${s.phone}</td>
+          <td>${s.school_name || '—'}</td>
+          <td><span class="badge badge-blue">${gradeMap[s.grade_id] || 'پایه '+s.grade_id}</span></td>
+          <td><span class="badge badge-green">${classMap[s.class_id] || 'کلاس '+s.class_id}</span></td>
+          <td>${new Date(s.created_at).toLocaleDateString('fa-IR')}</td>
+          <td>
+            <button class="btn btn-outline btn-sm" onclick="openEditModal(${s.id})">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteStudent(${s.id}, '${s.full_name}')">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      showToast('خطا در بارگذاری دانش‌آموزان', 'error');
+    }
+  }
+
+  async function submitAddStudent() {
+    const name  = document.getElementById('f-name').value.trim();
+    const nid   = document.getElementById('f-nid').value.trim();
+    const phone = document.getElementById('f-phone').value.trim();
+    const school = document.getElementById('f-school').value.trim();
+    const pass  = document.getElementById('f-pass').value;
+    const grade = document.getElementById('f-grade').value;
+    const cls   = document.getElementById('f-class').value;
+    const errEl = document.getElementById('add-error');
+
+    if (!name || !nid || !phone || !pass || !grade || !cls) {
+      errEl.textContent = 'لطفاً تمام فیلدهای الزامی را پر کنید.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    errEl.style.display = 'none';
+    try {
+      const res = await fetch('/api/students', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          full_name: name, national_id: nid, phone: phone,
+          password: pass, grade_id: parseInt(grade), class_id: parseInt(cls), school_name: school,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('دانش‌آموز با موفقیت اضافه شد ✅');
+        ['f-name','f-nid','f-phone','f-school','f-pass'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('f-grade').value = '';
+        document.getElementById('f-class').innerHTML = '<option value="">ابتدا پایه را انتخاب کنید</option>';
+        toggleAddForm();
+        loadStudents();
+      } else {
+        errEl.textContent = data.message || 'خطا در ثبت دانش‌آموز';
+        errEl.style.display = 'block';
+      }
+    } catch {
+      errEl.textContent = 'خطا در ارتباط با سرور';
+      errEl.style.display = 'block';
+    }
+  }
+
+  async function openEditModal(studentId) {
+    try {
+      const res = await fetch(`/api/students/${studentId}`);
+      const data = await res.json();
+      const s = data.student;
+      document.getElementById('edit-id').value    = s.id;
+      document.getElementById('edit-name').value  = s.full_name;
+      document.getElementById('edit-nid').value   = s.national_id;
+      document.getElementById('edit-phone').value = s.phone;
+      document.getElementById('edit-school').value = s.school_name || '';
+      document.getElementById('edit-pass').value  = '';
+      document.getElementById('edit-grade').value = s.grade_id;
+      loadEditClasses(s.class_id);
+      document.getElementById('edit-modal').classList.add('open');
+    } catch {
+      showToast('خطا در بارگذاری اطلاعات دانش‌آموز', 'error');
+    }
+  }
+
+  function loadEditClasses(currentClassId) {
+    const gradeId = document.getElementById('edit-grade').value;
+    populateClassSelect(gradeId, 'edit-class', currentClassId);
+  }
+
+  function closeEditModal() {
+    document.getElementById('edit-modal').classList.remove('open');
+  }
+
+  async function submitEditStudent() {
+    const id    = parseInt(document.getElementById('edit-id').value);
+    const name  = document.getElementById('edit-name').value.trim();
+    const nid   = document.getElementById('edit-nid').value.trim();
+    const phone = document.getElementById('edit-phone').value.trim();
+    const school = document.getElementById('edit-school').value.trim();
+    const pass  = document.getElementById('edit-pass').value;
+    const grade = document.getElementById('edit-grade').value;
+    const cls   = document.getElementById('edit-class').value;
+    const errEl = document.getElementById('edit-error');
+
+    const payload = {};
+    if (name)  payload.full_name   = name;
+    if (nid)   payload.national_id = nid;
+    if (phone) payload.phone       = phone;
+    payload.school_name = school;
+    if (pass)  payload.password    = pass;
+    if (grade) payload.grade_id    = parseInt(grade);
+    if (cls)   payload.class_id    = parseInt(cls);
+
+    errEl.style.display = 'none';
+    try {
+      const res = await fetch(`/api/students/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('اطلاعات دانش‌آموز به‌روزرسانی شد ✅');
+        closeEditModal();
+        loadStudents();
+      } else {
+        errEl.textContent = data.message || 'خطا در ویرایش';
+        errEl.style.display = 'block';
+      }
+    } catch {
+      errEl.textContent = 'خطا در ارتباط با سرور';
+      errEl.style.display = 'block';
+    }
+  }
+
+  async function deleteStudent(id, name) {
+    if (!confirm(`آیا از حذف دانش‌آموز "${name}" اطمینان دارید؟`)) return;
+    try {
+      const res = await fetch(`/api/students/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('دانش‌آموز حذف شد ✅');
+        loadStudents();
+      } else {
+        showToast(data.message || 'خطا در حذف', 'error');
+      }
+    } catch {
+      showToast('خطا در ارتباط با سرور', 'error');
+    }
+  }
+
+  (async () => {
+    await loadGradesAndClasses();
+    await loadStudents();
+  })();
+</script>
+</body>
+</html>

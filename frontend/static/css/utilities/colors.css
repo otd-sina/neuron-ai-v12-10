@@ -1,0 +1,3 @@
+.text-primary { color: var(--text); }
+.text-muted { color: var(--muted); }
+.bg-glass { background: var(--glass-bg); }

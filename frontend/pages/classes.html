@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مدیریت کلاس‌ها - نورون</title>
+  <script>
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('neuron-admin-theme');
+        const theme = savedTheme === 'light' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/pages/admin_analytics.css" />
+</head>
+<body class="analytics-page">
+<div class="page-glow glow-one" aria-hidden="true"></div>
+<div class="page-glow glow-two" aria-hidden="true"></div>
+
+<div class="admin-layout" dir="rtl">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>🧠 نورون</h1>
+      <span>پنل مدیریت</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">منو اصلی</div>
+      <a href="/admin/dashboard" class="nav-item" data-page="dashboard"><span class="icon">🏠</span> داشبورد</a>
+      <a href="/admin/students" class="nav-item" data-page="students"><span class="icon">👩‍🎓</span> مدیریت دانش‌آموزان</a>
+      <a href="/admin/classes" class="nav-item active" data-page="classes"><span class="icon">🏫</span> مدیریت کلاس‌ها</a>
+      <a href="/admin/assignments" class="nav-item" data-page="assignments"><span class="icon">📋</span> تکالیف</a>
+      <a href="/admin/create-exam" class="nav-item" data-page="create-exam"><span class="icon">🧪</span> ساخت آزمون مدرسه</a>
+      <a href="/admin/gradebook" class="nav-item" data-page="gradebook"><span class="icon">📒</span> دفتر نمرات</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="logout()">🚪 خروج از سیستم</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-title">🏫 مدیریت کلاس‌ها و پایه‌ها</div>
+      <div class="topbar-user">مدیر سیستم</div>
+    </header>
+
+    <main class="page-body">
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px;">
+
+        <!-- Add Grade -->
+        <div class="card">
+          <div class="card-title">📚 افزودن پایه تحصیلی</div>
+          <div id="grade-error" class="alert alert-error" style="display:none;"></div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label>نام پایه</label>
+            <input type="text" id="grade-name" placeholder="مثال: دهم، یازدهم، دوازدهم" />
+          </div>
+          <button class="btn btn-primary" onclick="submitAddGrade()">➕ افزودن پایه</button>
+        </div>
+
+        <!-- Add Class -->
+        <div class="card">
+          <div class="card-title">🏫 افزودن کلاس جدید</div>
+          <div id="class-error" class="alert alert-error" style="display:none;"></div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label>پایه تحصیلی</label>
+            <select id="class-grade">
+              <option value="">انتخاب پایه...</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label>نام کلاس</label>
+            <input type="text" id="class-name" placeholder="مثال: الف، ب، ج یا ریاضی۱" />
+          </div>
+          <button class="btn btn-primary" onclick="submitAddClass()">➕ افزودن کلاس</button>
+        </div>
+      </div>
+
+      <!-- Grades list -->
+      <div class="card">
+        <div class="card-title">📚 فهرست پایه‌های تحصیلی</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>#</th><th>نام پایه</th><th>تعداد کلاس</th><th>تاریخ ایجاد</th></tr>
+            </thead>
+            <tbody id="grades-tbody">
+              <tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);">در حال بارگذاری...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Classes list -->
+      <div class="card">
+        <div class="card-title">🏫 فهرست کلاس‌ها</div>
+        <div class="filter-bar">
+          <select id="filter-grade" onchange="loadClasses()">
+            <option value="">همه پایه‌ها</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="loadClasses()">🔄 بارگذاری مجدد</button>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>#</th><th>نام کلاس</th><th>پایه</th><th>تعداد دانش‌آموز</th><th>تاریخ ایجاد</th><th>عملیات</th></tr>
+            </thead>
+            <tbody id="classes-tbody">
+              <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);">در حال بارگذاری...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Class students detail -->
+      <div class="card" id="class-detail-card" style="display:none;">
+        <div class="card-title" id="class-detail-title">دانش‌آموزان کلاس</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>#</th><th>نام کامل</th><th>کد ملی</th><th>شماره تماس</th></tr>
+            </thead>
+            <tbody id="class-students-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="/static/js/common.js"></script>
+<script>
+  checkAuth();
+
+  let allGrades  = [];
+  let allClasses = [];
+
+  async function loadAll() {
+    const [gRes, cRes] = await Promise.all([
+      fetch('/api/grades'),
+      fetch('/api/classes'),
+    ]);
+    allGrades  = (await gRes.json()).grades  || [];
+    allClasses = (await cRes.json()).classes || [];
+
+    renderGrades();
+    renderClasses();
+    populateGradeSelects();
+  }
+
+  function populateGradeSelects() {
+    ['class-grade', 'filter-grade'].forEach(id => {
+      const sel = document.getElementById(id);
+      const placeholder = sel.options[0].text;
+      sel.innerHTML = `<option value="">${placeholder}</option>`;
+      allGrades.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g.id;
+        opt.textContent = g.name;
+        sel.appendChild(opt);
+      });
+    });
+  }
+
+  function renderGrades() {
+    const tbody = document.getElementById('grades-tbody');
+    if (allGrades.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);">هیچ پایه‌ای ثبت نشده.</td></tr>';
+      return;
+    }
+    const gradeClassCount = {};
+    allClasses.forEach(c => {
+      gradeClassCount[c.grade_id] = (gradeClassCount[c.grade_id] || 0) + 1;
+    });
+    tbody.innerHTML = allGrades.map(g => `
+      <tr>
+        <td>${g.id}</td>
+        <td><strong>${g.name}</strong></td>
+        <td><span class="badge badge-blue">${gradeClassCount[g.id] || 0} کلاس</span></td>
+        <td>${new Date(g.created_at).toLocaleDateString('fa-IR')}</td>
+      </tr>
+    `).join('');
+  }
+
+  function renderClasses(filtered) {
+    const classes = filtered !== undefined ? filtered : allClasses;
+    const tbody = document.getElementById('classes-tbody');
+    if (classes.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);">هیچ کلاسی یافت نشد.</td></tr>';
+      return;
+    }
+    const gradeMap = Object.fromEntries(allGrades.map(g => [g.id, g.name]));
+    tbody.innerHTML = classes.map(c => `
+      <tr>
+        <td>${c.id}</td>
+        <td><strong>${c.name}</strong></td>
+        <td><span class="badge badge-blue">${gradeMap[c.grade_id] || 'پایه '+c.grade_id}</span></td>
+        <td id="count-${c.id}"><span class="badge badge-gray">—</span></td>
+        <td>${new Date(c.created_at).toLocaleDateString('fa-IR')}</td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="showClassStudents(${c.id}, '${c.name}')">👥 دانش‌آموزان</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteClass(${c.id}, '${c.name}')">🗑️</button>
+        </td>
+      </tr>
+    `).join('');
+    classes.forEach(c => loadClassCount(c.id));
+  }
+
+  async function loadClassCount(classId) {
+    try {
+      const res = await fetch(`/api/classes/${classId}/students`);
+      const data = await res.json();
+      const count = (data.students || []).length;
+      const el = document.getElementById(`count-${classId}`);
+      if (el) el.innerHTML = `<span class="badge badge-green">${count} نفر</span>`;
+    } catch {}
+  }
+
+  function loadClasses() {
+    const gradeId = document.getElementById('filter-grade').value;
+    const filtered = gradeId ? allClasses.filter(c => c.grade_id == gradeId) : allClasses;
+    renderClasses(filtered);
+  }
+
+  async function submitAddGrade() {
+    const name = document.getElementById('grade-name').value.trim();
+    const errEl = document.getElementById('grade-error');
+    if (!name) { errEl.textContent = 'نام پایه را وارد کنید.'; errEl.style.display = 'block'; return; }
+    errEl.style.display = 'none';
+    try {
+      const res = await fetch('/api/grades', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name }),
+      });
+      if (res.ok) {
+        showToast('پایه تحصیلی اضافه شد ✅');
+        document.getElementById('grade-name').value = '';
+        await loadAll();
+      } else {
+        const data = await res.json();
+        errEl.textContent = data.message || 'خطا در ثبت پایه';
+        errEl.style.display = 'block';
+      }
+    } catch {
+      errEl.textContent = 'خطا در ارتباط با سرور';
+      errEl.style.display = 'block';
+    }
+  }
+
+  async function submitAddClass() {
+    const gradeId = document.getElementById('class-grade').value;
+    const name    = document.getElementById('class-name').value.trim();
+    const errEl   = document.getElementById('class-error');
+    if (!gradeId || !name) { errEl.textContent = 'پایه و نام کلاس را وارد کنید.'; errEl.style.display = 'block'; return; }
+    errEl.style.display = 'none';
+    try {
+      const res = await fetch('/api/classes', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ grade_id: parseInt(gradeId), name }),
+      });
+      if (res.ok) {
+        showToast('کلاس با موفقیت اضافه شد ✅');
+        document.getElementById('class-name').value = '';
+        await loadAll();
+      } else {
+        const data = await res.json();
+        errEl.textContent = data.message || 'خطا در ثبت کلاس';
+        errEl.style.display = 'block';
+      }
+    } catch {
+      errEl.textContent = 'خطا در ارتباط با سرور';
+      errEl.style.display = 'block';
+    }
+  }
+
+  async function showClassStudents(classId, className) {
+    try {
+      const res = await fetch(`/api/classes/${classId}/students`);
+      const data = await res.json();
+      const students = data.students || [];
+      const card  = document.getElementById('class-detail-card');
+      const title = document.getElementById('class-detail-title');
+      const tbody = document.getElementById('class-students-tbody');
+      title.textContent = `👥 دانش‌آموزان کلاس: ${className}`;
+      if (students.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);">این کلاس دانش‌آموزی ندارد.</td></tr>';
+      } else {
+        tbody.innerHTML = students.map(s => `
+          <tr>
+            <td>${s.id}</td>
+            <td>${s.full_name}</td>
+            <td><span class="badge badge-gray">${s.national_id}</span></td>
+            <td>${s.phone}</td>
+          </tr>
+        `).join('');
+      }
+      card.style.display = 'block';
+      card.scrollIntoView({ behavior: 'smooth' });
+    } catch {
+      showToast('خطا در بارگذاری دانش‌آموزان کلاس', 'error');
+    }
+  }
+
+  async function deleteClass(id, name) {
+    if (!confirm(`آیا از حذف کلاس "${name}" اطمینان دارید؟`)) return;
+    try {
+      const res = await fetch(`/api/classes/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('کلاس حذف شد ✅');
+        await loadAll();
+      } else {
+        showToast(data.message || 'خطا در حذف', 'error');
+      }
+    } catch {
+      showToast('خطا در ارتباط با سرور', 'error');
+    }
+  }
+
+  loadAll();
+</script>
+</body>
+</html>

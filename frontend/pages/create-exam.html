@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ساخت آزمون مدرسه - نورون</title>
+  <script>
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('neuron-admin-theme');
+        const theme = savedTheme === 'light' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/pages/admin_analytics.css" />
+</head>
+<body class="analytics-page">
+  <div class="page-glow glow-one" aria-hidden="true"></div>
+  <div class="page-glow glow-two" aria-hidden="true"></div>
+
+  <div class="admin-layout" dir="rtl">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <h1>🧠 نورون</h1>
+        <span>پنل مدیریت</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">منو اصلی</div>
+        <a href="/admin/dashboard" class="nav-item" data-page="dashboard"><span class="icon">📊</span> داشبورد تحلیلی</a>
+        <a href="/admin/students" class="nav-item" data-page="students"><span class="icon">👩‍🎓</span> مدیریت دانش‌آموزان</a>
+        <a href="/admin/classes" class="nav-item" data-page="classes"><span class="icon">🏫</span> مدیریت کلاس‌ها</a>
+        <a href="/admin/assignments" class="nav-item" data-page="assignments"><span class="icon">📋</span> تکالیف</a>
+        <a href="/admin/create-exam" class="nav-item active" data-page="create-exam"><span class="icon">🧪</span> ساخت آزمون مدرسه</a>
+      <a href="/admin/gradebook" class="nav-item" data-page="gradebook"><span class="icon">📒</span> دفتر نمرات</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="logout()">🚪 خروج از سیستم</button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <div>
+          <div class="topbar-title">🧪 طراحی آزمون حرفه‌ای مدرسه</div>
+          <p class="topbar-subtitle">آزمون‌های زمان‌بندی‌شده برای یک پایه یا یک کلاس مشخص ایجاد کن.</p>
+        </div>
+      </header>
+
+      <main class="page-body">
+        <section class="card analytics-card">
+          <div class="card-title">➕ ایجاد آزمون جدید</div>
+          <div id="create-exam-error" class="alert alert-error is-hidden"></div>
+          <div id="create-exam-success" class="alert alert-success is-hidden"></div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="exam-title">عنوان آزمون *</label>
+              <input id="exam-title" type="text" placeholder="مثال: آزمون میان‌ترم ریاضی" maxlength="140" />
+            </div>
+
+            <div class="form-group">
+              <label for="exam-subject">درس *</label>
+              <input id="exam-subject" type="text" placeholder="مثال: ریاضی" maxlength="80" />
+            </div>
+
+            <div class="form-group">
+              <label for="exam-grade">پایه *</label>
+              <select id="exam-grade"></select>
+            </div>
+
+            <div class="form-group">
+              <label for="exam-class">کلاس *</label>
+              <select id="exam-class"></select>
+            </div>
+
+            <div class="form-group">
+              <label for="exam-start-time">تاریخ و زمان شروع *</label>
+              <input id="exam-start-time" type="datetime-local" />
+            </div>
+
+            <div class="form-group">
+              <label for="exam-duration">مدت آزمون (دقیقه) *</label>
+              <input id="exam-duration" type="number" min="1" max="240" value="60" />
+            </div>
+
+            <div class="form-group">
+              <label for="exam-total-questions">تعداد کل سوال (حداکثر 50) *</label>
+              <input id="exam-total-questions" type="number" min="1" max="50" value="20" />
+            </div>
+
+            <div class="form-group matrix-summary-group">
+              <label>وضعیت ماتریس سختی</label>
+              <div id="difficulty-summary" class="matrix-summary">جمع ماتریس: 0</div>
+            </div>
+
+            <div class="form-group full-span">
+              <label for="exam-focus-area">focus_area (بازه دقیق فصل/صفحه) *</label>
+              <textarea id="exam-focus-area" rows="4" placeholder="مثال: صفحه ۲۰ تا ۴۵ کتاب ریاضی، فصل کسرها و نسبت"></textarea>
+            </div>
+          </div>
+
+          <div class="difficulty-matrix-grid">
+            <article class="difficulty-item">
+              <span>آسان</span>
+              <input id="diff-easy" type="number" min="0" max="50" value="8" />
+            </article>
+            <article class="difficulty-item">
+              <span>متوسط</span>
+              <input id="diff-medium" type="number" min="0" max="50" value="8" />
+            </article>
+            <article class="difficulty-item">
+              <span>سخت</span>
+              <input id="diff-hard" type="number" min="0" max="50" value="3" />
+            </article>
+            <article class="difficulty-item">
+              <span>تیزهوشان</span>
+              <input id="diff-gifted" type="number" min="0" max="50" value="1" />
+            </article>
+          </div>
+
+          <div class="form-actions exam-create-actions">
+            <button id="generate-exam-btn" class="btn btn-primary" type="button">⚡ تولید و ذخیره آزمون</button>
+            <div id="generate-loading" class="generate-loading is-hidden">
+              <span class="spinner mini-spinner" aria-hidden="true"></span>
+              <span>در حال طراحی حرفه‌ای سوالات توسط هوش مصنوعی و ثبت در پایگاه داده...</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card analytics-card">
+          <div class="card-title">📚 آزمون‌های مدرسه ثبت‌شده</div>
+          <div class="filter-bar">
+            <select id="exam-filter-grade"></select>
+            <select id="exam-filter-class"></select>
+            <button id="reload-exams-btn" class="btn btn-outline btn-sm" type="button">🔄 بروزرسانی فهرست</button>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>عنوان</th>
+                  <th>درس</th>
+                  <th>پایه</th>
+                  <th>کلاس</th>
+                  <th>شروع</th>
+                  <th>مدت</th>
+                  <th>وضعیت</th>
+                  <th>عملیات</th>
+                </tr>
+              </thead>
+              <tbody id="school-exams-table-body">
+                <tr>
+                  <td colspan="9" class="empty-state-cell">در حال بارگذاری آزمون‌ها...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="/static/js/common.js"></script>
+  <script src="/static/js/admin_create_exam.js"></script>
+</body>
+</html>

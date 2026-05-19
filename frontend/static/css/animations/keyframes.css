@@ -1,0 +1,69 @@
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes card-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes card-entry {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes neon-border-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes flash-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  35% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(220%) skewX(-18deg);
+  }
+}
+
+@keyframes message-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
