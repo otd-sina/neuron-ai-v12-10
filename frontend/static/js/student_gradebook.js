@@ -55,6 +55,16 @@ function attendanceLabel(status) {
   }[status] || status || "—";
 }
 
+function attendanceBadgeClass(status) {
+  return {
+    present: "attendance-badge present",
+    absent: "attendance-badge absent",
+    late: "attendance-badge late",
+    excused: "attendance-badge excused",
+    left_early: "attendance-badge late",
+  }[status] || "attendance-badge";
+}
+
 function gradeTypeLabel(type) {
   return {
     quiz: "کوییز",
@@ -134,7 +144,7 @@ function renderAttendance(records) {
 
   refs.attendanceTable.innerHTML = `
     <ul class="mini-list">
-      ${records.map((record) => `<li class="mini-list-item"><p><strong>${attendanceLabel(record.status)}</strong></p><div class="mini-list-meta"><span>${formatDate(record.date)}</span><span>${record.note || "بدون یادداشت"}</span></div></li>`).join("")}
+      ${records.map((record) => `<li class="mini-list-item"><p><strong class="${attendanceBadgeClass(record.status)}">${attendanceLabel(record.status)}</strong></p><div class="mini-list-meta"><span>${formatDate(record.date)}</span><span>${record.note || "بدون یادداشت"}</span></div></li>`).join("")}
     </ul>
   `;
 }

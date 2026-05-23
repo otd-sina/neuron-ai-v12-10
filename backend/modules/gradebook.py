@@ -112,6 +112,14 @@ def _attendance_dates_key(class_id: int) -> str:
     return f"class:{class_id}:attendance_dates"
 
 
+def _attendance_student_record_key(student_id: int, attendance_date: str) -> str:
+    return f"gradebook:attendance:student:{student_id}:{attendance_date}:record"
+
+
+def _attendance_student_dates_key(student_id: int) -> str:
+    return f"student:{student_id}:attendance_dates"
+
+
 def _participation_key(class_id: int, participation_date: str) -> str:
     return f"gradebook:participation:{class_id}:{participation_date}:scores"
 
@@ -568,6 +576,22 @@ def save_class_attendance(
         return None, "کلاس موردنظر پیدا نشد."
 
     normalized_exceptions: dict[str, dict] = {}
+    now = _utcnow_iso()
+
+    # Composite logical key: (student_id, attendance_date)
+    for student_id in student_map:
+        student_key = str(student_id)
+        payload = {
+            "student_id": student_id,
+            "class_id": class_id,
+            "attendance_date": date_token,
+            "status": "present",
+            "note": "",
+            "updated_at": now,
+        }
+        db_set(_attendance_student_record_key(student_id, date_token), payload)
+        _append_unique_value(_attendance_student_dates_key(student_id), date_token)
+
     for item in exceptions:
         if not isinstance(item, dict):
             continue
@@ -580,11 +604,23 @@ def save_class_attendance(
         if status == "present":
             continue
 
+        note = _normalize_text(item.get("note"))
         normalized_exceptions[str(student_id)] = {
             "status": status,
-            "note": _normalize_text(item.get("note")),
-            "updated_at": _utcnow_iso(),
+            "note": note,
+            "updated_at": now,
         }
+        db_set(
+            _attendance_student_record_key(student_id, date_token),
+            {
+                "student_id": student_id,
+                "class_id": class_id,
+                "attendance_date": date_token,
+                "status": status,
+                "note": note,
+                "updated_at": now,
+            },
+        )
 
     key = _attendance_key(class_id, date_token)
     dates_key = _attendance_dates_key(class_id)
@@ -1112,13 +1148,24 @@ def get_student_attendance_log(student_id: int, class_id: int | None = None) -> 
 
     student_key = str(student_id)
     rows: list[dict] = []
-    for date_token in list_class_attendance_dates(resolved_class_id):
-        entry = _load_attendance_exceptions(resolved_class_id, date_token).get(student_key) or {}
+    tracked_dates = set(list_class_attendance_dates(resolved_class_id))
+    tracked_dates.update(_ensure_date_list(_attendance_student_dates_key(student_id)))
+
+    for date_token in tracked_dates:
+        stored_record = db_get(_attendance_student_record_key(student_id, date_token), default={})
+        if isinstance(stored_record, dict):
+            status = _normalize_attendance_status(stored_record.get("status"))
+            note = _normalize_text(stored_record.get("note"))
+        else:
+            entry = _load_attendance_exceptions(resolved_class_id, date_token).get(student_key) or {}
+            status = _normalize_attendance_status(entry.get("status"))
+            note = _normalize_text(entry.get("note"))
+
         rows.append(
             {
                 "date": date_token,
-                "status": _normalize_attendance_status(entry.get("status")),
-                "note": _normalize_text(entry.get("note")),
+                "status": status,
+                "note": note,
             }
         )
 
