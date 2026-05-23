@@ -866,8 +866,9 @@ def calculate_student_attendance_summary(student_id: int, class_id: int | None) 
             status = "present"
         counts[status] += 1
 
-    tracked_days = len(dates)
-    present_rate = round((counts["present"] / tracked_days) * 100, 2) if tracked_days else None
+    present_like_days = counts["present"] + counts["late"] + counts["left_early"]
+    total_counted_days = present_like_days + counts["absent"] + counts["excused"]
+    present_rate = round((present_like_days / total_counted_days) * 100, 2) if total_counted_days else 0
 
     return {
         "tracked_days": tracked_days,
