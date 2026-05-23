@@ -625,12 +625,12 @@ def save_class_attendance(
     key = _attendance_key(class_id, date_token)
     dates_key = _attendance_dates_key(class_id)
 
+    _append_unique_value(dates_key, date_token)
+
     if normalized_exceptions:
         db_set(key, normalized_exceptions)
-        _append_unique_value(dates_key, date_token)
     else:
         db_delete(key)
-        _remove_value_from_index(dates_key, date_token)
 
     return get_class_attendance_sheet(class_id, date_token)
 
@@ -833,7 +833,9 @@ def calculate_student_attendance_summary(student_id: int, class_id: int | None) 
             "present_rate": None,
         }
 
-    dates = list_class_attendance_dates(class_id)
+    class_dates = list_class_attendance_dates(class_id)
+    student_dates = _ensure_date_list(_attendance_student_dates_key(student_id))
+    dates = sorted(set(class_dates) | set(student_dates))
     if not dates:
         return {
             "tracked_days": 0,
@@ -853,10 +855,13 @@ def calculate_student_attendance_summary(student_id: int, class_id: int | None) 
         "excused": 0,
     }
 
-    student_key = str(student_id)
     for date_token in dates:
-        exceptions = _load_attendance_exceptions(class_id, date_token)
-        status = _normalize_attendance_status(exceptions.get(student_key, {}).get("status"))
+        stored_record = db_get(_attendance_student_record_key(student_id, date_token), default={})
+        if isinstance(stored_record, dict):
+            status = _normalize_attendance_status(stored_record.get("status"))
+        else:
+            exceptions = _load_attendance_exceptions(class_id, date_token)
+            status = _normalize_attendance_status(exceptions.get(str(student_id), {}).get("status"))
         if status not in counts:
             status = "present"
         counts[status] += 1
