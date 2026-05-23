@@ -186,6 +186,15 @@
           <div class="filter-bar">
             <select id="attendance-class"></select>
             <input id="attendance-date" type="date" />
+            <input id="attendance-search" type="text" placeholder="جستجو نام/کد ملی دانش‌آموز" />
+            <select id="attendance-bulk-status">
+              <option value="">وضعیت جمعی (اختیاری)</option>
+              <option value="present">همه حاضر</option>
+              <option value="absent">همه غایب</option>
+              <option value="late">همه تاخیر</option>
+              <option value="excused">همه موجه</option>
+            </select>
+            <button id="attendance-apply-bulk" class="btn btn-outline btn-sm" type="button">اعمال جمعی</button>
             <button id="attendance-load" class="btn btn-outline btn-sm" type="button">📥 بارگذاری کلاس</button>
           </div>
           <p id="attendance-summary" class="gradebook-summary-line">—</p>
@@ -215,6 +224,7 @@
           <div class="filter-bar">
             <select id="participation-class"></select>
             <input id="participation-date" type="date" />
+            <input id="participation-search" type="text" placeholder="جستجو نام دانش‌آموز" />
             <button id="participation-load" class="btn btn-outline btn-sm" type="button">📥 بارگذاری کلاس</button>
           </div>
           <p id="participation-summary" class="gradebook-summary-line">—</p>

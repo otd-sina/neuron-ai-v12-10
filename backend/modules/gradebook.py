@@ -112,6 +112,14 @@ def _attendance_dates_key(class_id: int) -> str:
     return f"class:{class_id}:attendance_dates"
 
 
+def _attendance_student_record_key(student_id: int, attendance_date: str) -> str:
+    return f"gradebook:attendance:student:{student_id}:{attendance_date}:record"
+
+
+def _attendance_student_dates_key(student_id: int) -> str:
+    return f"student:{student_id}:attendance_dates"
+
+
 def _participation_key(class_id: int, participation_date: str) -> str:
     return f"gradebook:participation:{class_id}:{participation_date}:scores"
 
@@ -568,6 +576,22 @@ def save_class_attendance(
         return None, "کلاس موردنظر پیدا نشد."
 
     normalized_exceptions: dict[str, dict] = {}
+    now = _utcnow_iso()
+
+    # Composite logical key: (student_id, attendance_date)
+    for student_id in student_map:
+        student_key = str(student_id)
+        payload = {
+            "student_id": student_id,
+            "class_id": class_id,
+            "attendance_date": date_token,
+            "status": "present",
+            "note": "",
+            "updated_at": now,
+        }
+        db_set(_attendance_student_record_key(student_id, date_token), payload)
+        _append_unique_value(_attendance_student_dates_key(student_id), date_token)
+
     for item in exceptions:
         if not isinstance(item, dict):
             continue
@@ -580,21 +604,33 @@ def save_class_attendance(
         if status == "present":
             continue
 
+        note = _normalize_text(item.get("note"))
         normalized_exceptions[str(student_id)] = {
             "status": status,
-            "note": _normalize_text(item.get("note")),
-            "updated_at": _utcnow_iso(),
+            "note": note,
+            "updated_at": now,
         }
+        db_set(
+            _attendance_student_record_key(student_id, date_token),
+            {
+                "student_id": student_id,
+                "class_id": class_id,
+                "attendance_date": date_token,
+                "status": status,
+                "note": note,
+                "updated_at": now,
+            },
+        )
 
     key = _attendance_key(class_id, date_token)
     dates_key = _attendance_dates_key(class_id)
 
+    _append_unique_value(dates_key, date_token)
+
     if normalized_exceptions:
         db_set(key, normalized_exceptions)
-        _append_unique_value(dates_key, date_token)
     else:
         db_delete(key)
-        _remove_value_from_index(dates_key, date_token)
 
     return get_class_attendance_sheet(class_id, date_token)
 
@@ -797,7 +833,9 @@ def calculate_student_attendance_summary(student_id: int, class_id: int | None) 
             "present_rate": None,
         }
 
-    dates = list_class_attendance_dates(class_id)
+    class_dates = list_class_attendance_dates(class_id)
+    student_dates = _ensure_date_list(_attendance_student_dates_key(student_id))
+    dates = sorted(set(class_dates) | set(student_dates))
     if not dates:
         return {
             "tracked_days": 0,
@@ -817,16 +855,20 @@ def calculate_student_attendance_summary(student_id: int, class_id: int | None) 
         "excused": 0,
     }
 
-    student_key = str(student_id)
     for date_token in dates:
-        exceptions = _load_attendance_exceptions(class_id, date_token)
-        status = _normalize_attendance_status(exceptions.get(student_key, {}).get("status"))
+        stored_record = db_get(_attendance_student_record_key(student_id, date_token), default={})
+        if isinstance(stored_record, dict):
+            status = _normalize_attendance_status(stored_record.get("status"))
+        else:
+            exceptions = _load_attendance_exceptions(class_id, date_token)
+            status = _normalize_attendance_status(exceptions.get(str(student_id), {}).get("status"))
         if status not in counts:
             status = "present"
         counts[status] += 1
 
-    tracked_days = len(dates)
-    present_rate = round((counts["present"] / tracked_days) * 100, 2) if tracked_days else None
+    present_like_days = counts["present"] + counts["late"] + counts["left_early"]
+    total_counted_days = present_like_days + counts["absent"] + counts["excused"]
+    present_rate = round((present_like_days / total_counted_days) * 100, 2) if total_counted_days else 0
 
     return {
         "tracked_days": tracked_days,
@@ -1099,6 +1141,42 @@ def get_student_gradebook_timeline(student_id: int, class_id: int | None = None)
         "attendance_exceptions": attendance_exceptions,
         "participation_records": participation_records,
     }
+
+
+def get_student_attendance_log(student_id: int, class_id: int | None = None) -> list[dict]:
+    student = get_student(student_id)
+    if student is None:
+        return []
+
+    resolved_class_id = class_id if isinstance(class_id, int) else student.get("class_id")
+    if not isinstance(resolved_class_id, int):
+        return []
+
+    student_key = str(student_id)
+    rows: list[dict] = []
+    tracked_dates = set(list_class_attendance_dates(resolved_class_id))
+    tracked_dates.update(_ensure_date_list(_attendance_student_dates_key(student_id)))
+
+    for date_token in tracked_dates:
+        stored_record = db_get(_attendance_student_record_key(student_id, date_token), default={})
+        if isinstance(stored_record, dict):
+            status = _normalize_attendance_status(stored_record.get("status"))
+            note = _normalize_text(stored_record.get("note"))
+        else:
+            entry = _load_attendance_exceptions(resolved_class_id, date_token).get(student_key) or {}
+            status = _normalize_attendance_status(entry.get("status"))
+            note = _normalize_text(entry.get("note"))
+
+        rows.append(
+            {
+                "date": date_token,
+                "status": status,
+                "note": note,
+            }
+        )
+
+    rows.sort(key=lambda item: item.get("date") or "", reverse=True)
+    return rows
 def get_student_gradebook_summary(student_id: int, class_id: int | None = None) -> dict | None:
     report = build_student_report_card(student_id, class_id=class_id)
     if not isinstance(report, dict):
