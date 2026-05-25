@@ -3,101 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>کارنامه و دفترچه نمرات - نورون</title>
+  <title>هاب کارنامه - نورون</title>
   <link rel="stylesheet" href="/static/css/student.css" />
 </head>
 <body class="student-page gradebook-student-page has-bottom-nav" data-nav-page="gradebook">
-  <div class="bg-orb orb-one"></div>
-  <div class="bg-orb orb-two"></div>
-
   <header class="student-header section-header">
-    <div>
-      <p class="chip">دفترچه نمرات</p>
-      <h1>کارنامه، حضور و مشارکت</h1>
-      <p class="muted">نمای کامل عملکرد ثبت‌شده توسط مدرسه</p>
-    </div>
-    <button id="gradebook-refresh" class="btn-secondary" type="button">بروزرسانی</button>
+    <div><p class="chip">کارنامه</p><h1>هاب کارنامه دانش‌آموز</h1></div>
   </header>
-
   <main class="dashboard-shell list-page-shell">
-    <section id="student-gradebook-alert" class="alert error hidden" role="alert"></section>
-
-    <section id="student-gradebook-loading" class="glass-card loading-box">
-      <div class="spinner"></div>
-      <p>در حال دریافت کارنامه...</p>
-    </section>
-
-    <section id="student-gradebook-content" class="gradebook-student-content hidden">
-      <article class="glass-card dashboard-card visible">
-        <div class="card-head-row">
-          <h2>خلاصه کارنامه</h2>
-          <span id="student-gradebook-updated" class="card-hint">—</span>
-        </div>
-        <div id="student-gradebook-summary"></div>
-      </article>
-
-      <article class="glass-card dashboard-card visible">
-        <div class="card-head-row">
-          <h2>میانگین به تفکیک درس</h2>
-          <span class="card-hint">درصد و GPA</span>
-        </div>
-        <div id="student-subject-averages"></div>
-      </article>
-
-      <article class="glass-card dashboard-card visible">
-        <div class="card-head-row">
-          <h2>نمرات ثبت‌شده</h2>
-          <span id="student-grades-count" class="card-hint">—</span>
-        </div>
-        <div id="student-grades-table"></div>
-      </article>
-
-      <article class="glass-card dashboard-card visible">
-        <div class="card-head-row">
-          <h2>حضور و غیاب</h2>
-          <span id="student-attendance-rate" class="card-hint">—</span>
-        </div>
-        <div id="student-attendance-table"></div>
-      </article>
-
-      <article class="glass-card dashboard-card visible">
-        <div class="card-head-row">
-          <h2>مشارکت کلاسی</h2>
-          <span id="student-participation-average" class="card-hint">—</span>
-        </div>
-        <div id="student-participation-table"></div>
-      </article>
+    <section class="gradebook-hub-grid">
+      <a class="glass-card dashboard-card visible" href="/student/gradebook/attendance"><h2>حضور و غیاب</h2><p class="muted">مشاهده وضعیت‌ها، جستجو و فیلتر تاریخ</p></a>
+      <a class="glass-card dashboard-card visible" href="/student/gradebook/participation"><h2>فعالیت کلاسی</h2><p class="muted">لیست امتیازهای مشارکت و میانگین</p></a>
+      <a class="glass-card dashboard-card visible" href="/student/gradebook/grades"><h2>نمرات ثبت شده</h2><p class="muted">نمرات آزمون‌ها و تفکیک دروس</p></a>
+      <a class="glass-card dashboard-card visible" href="/student/gradebook/messages"><h2>پیام‌های معلم</h2><p class="muted">پیام‌های ثبت‌شده برای شما</p></a>
     </section>
   </main>
-
-  <nav class="floating-bottom-nav glass-card" aria-label="ناوبری اصلی دانش‌آموز">
-    <a href="/student/dashboard" class="bottom-nav-item" data-nav="home" aria-label="خانه">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 11.5L12 4l9 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10.5V20h13V10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <span>خانه</span>
-    </a>
-    <a href="/student/subjects" class="bottom-nav-item" data-nav="tutor" aria-label="معلم هوش مصنوعی">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 8.5a4 4 0 118 0V10a3 3 0 013 3v1.5A4.5 4.5 0 0114.5 19H9.5A4.5 4.5 0 015 14.5V13a3 3 0 013-3V8.5z" stroke="currentColor" stroke-width="1.8"/><path d="M9 14h6M12 6v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <span>معلم هوشمند</span>
-    </a>
-    <a href="/student/assignments" class="bottom-nav-item" data-nav="assignments" aria-label="تکالیف">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <span>تکالیف</span>
-    </a>
-    <a href="/student/gradebook" class="bottom-nav-item" data-nav="gradebook" aria-label="کارنامه">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 4h12v16H6z" stroke="currentColor" stroke-width="1.8"/><path d="M9 8h6M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <span>کارنامه</span>
-    </a>
-    <a href="/student/exams" class="bottom-nav-item" data-nav="exams" aria-label="آزمون و تحلیل">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v16M6 8h12M8 14h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/></svg>
-      <span>آزمون‌ها</span>
-    </a>
-    <a href="/student/profile" class="bottom-nav-item" data-nav="profile" aria-label="پروفایل">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M5 20a7 7 0 0114 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <span>پروفایل</span>
-    </a>
-  </nav>
-
   <script src="/static/js/student_navigation.js"></script>
-  <script src="/static/js/student_gradebook.js"></script>
 </body>
 </html>

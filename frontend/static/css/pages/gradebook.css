@@ -2,6 +2,12 @@
   grid-column: 1 / -1;
 }
 
+.gradebook-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
 .gradebook-page #grade-form-cancel {
   display: none;
 }

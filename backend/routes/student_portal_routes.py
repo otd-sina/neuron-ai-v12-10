@@ -24,6 +24,7 @@ from backend.modules.student_portal import (
     is_valid_national_id,
     normalize_national_id,
 )
+from backend.modules.teacher_messages import list_student_messages
 from backend.modules.school_exams import (
     build_school_result_key,
     evaluate_exam_status,
@@ -564,6 +565,91 @@ async def student_gradebook(request: Request):
     report_card = build_student_report_card(
         student_id,
         class_id=student.get("class_id") if isinstance(student, dict) else None,
+    )
+
+
+@router.get("/gradebook/attendance")
+async def student_gradebook_attendance(request: Request):
+    auth = require_student_auth(request)
+    if auth is not None:
+        return auth
+
+    student_id = request.state.student_id
+    student = request.state.student
+    report_card = build_student_report_card(
+        student_id,
+        class_id=student.get("class_id") if isinstance(student, dict) else None,
+    ) or {}
+    return JSONResponse(
+        content={
+            "success": True,
+            "attendance_log": get_student_attendance_log(
+                student_id,
+                class_id=student.get("class_id") if isinstance(student, dict) else None,
+            ),
+            "attendance_summary": report_card.get("attendance_summary") or {},
+        }
+    )
+
+
+@router.get("/gradebook/participation")
+async def student_gradebook_participation(request: Request):
+    auth = require_student_auth(request)
+    if auth is not None:
+        return auth
+
+    student_id = request.state.student_id
+    student = request.state.student
+    timeline = get_student_gradebook_timeline(
+        student_id,
+        class_id=student.get("class_id") if isinstance(student, dict) else None,
+    )
+    report_card = build_student_report_card(
+        student_id,
+        class_id=student.get("class_id") if isinstance(student, dict) else None,
+    ) or {}
+    return JSONResponse(
+        content={
+            "success": True,
+            "records": timeline.get("participation_records", []),
+            "summary": report_card.get("participation_summary") or {},
+        }
+    )
+
+
+@router.get("/gradebook/grades")
+async def student_gradebook_grades(request: Request):
+    auth = require_student_auth(request)
+    if auth is not None:
+        return auth
+
+    student_id = request.state.student_id
+    student = request.state.student
+    report_card = build_student_report_card(
+        student_id,
+        class_id=student.get("class_id") if isinstance(student, dict) else None,
+    ) or {}
+    return JSONResponse(
+        content={
+            "success": True,
+            "recent_assessments": report_card.get("recent_assessments", []),
+            "subject_breakdown": report_card.get("subject_breakdown", []),
+            "grade_average_percentage": report_card.get("grade_average_percentage"),
+        }
+    )
+
+
+@router.get("/messages")
+async def student_messages(request: Request):
+    auth = require_student_auth(request)
+    if auth is not None:
+        return auth
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "messages": list_student_messages(request.state.student_id),
+        }
     )
     timeline = get_student_gradebook_timeline(
         student_id,
