@@ -60,6 +60,9 @@
 
     attendanceClass: document.getElementById("attendance-class"),
     attendanceDate: document.getElementById("attendance-date"),
+    attendanceSearch: document.getElementById("attendance-search"),
+    attendanceBulkStatus: document.getElementById("attendance-bulk-status"),
+    attendanceApplyBulk: document.getElementById("attendance-apply-bulk"),
     attendanceLoad: document.getElementById("attendance-load"),
     attendanceSave: document.getElementById("attendance-save"),
     attendanceSummary: document.getElementById("attendance-summary"),
@@ -67,6 +70,7 @@
 
     participationClass: document.getElementById("participation-class"),
     participationDate: document.getElementById("participation-date"),
+    participationSearch: document.getElementById("participation-search"),
     participationLoad: document.getElementById("participation-load"),
     participationSave: document.getElementById("participation-save"),
     participationSummary: document.getElementById("participation-summary"),
@@ -481,6 +485,7 @@
         `;
       })
       .join("");
+    filterAttendanceRows();
   }
 
   function collectAttendanceExceptions() {
@@ -509,6 +514,29 @@
     });
 
     return exceptions;
+  }
+
+  function filterAttendanceRows() {
+    const needle = (refs.attendanceSearch?.value || "").trim().toLowerCase();
+    const rows = Array.from(refs.attendanceBody.querySelectorAll("tr[data-student-id]"));
+    rows.forEach((row) => {
+      row.style.display = !needle || row.textContent.toLowerCase().includes(needle) ? "" : "none";
+    });
+  }
+
+  function applyBulkAttendanceStatus() {
+    const status = refs.attendanceBulkStatus?.value;
+    if (!status) {
+      showToast("ابتدا وضعیت جمعی را انتخاب کنید.", "error");
+      return;
+    }
+    const rows = Array.from(refs.attendanceBody.querySelectorAll("tr[data-student-id]"));
+    rows.forEach((row) => {
+      if (row.style.display === "none") return;
+      const statusSelect = row.querySelector(".attendance-status-select");
+      if (statusSelect) statusSelect.value = status;
+    });
+    showToast("وضعیت جمعی برای دانش‌آموزان قابل مشاهده اعمال شد.");
   }
 
   function renderParticipationSheet(sheet) {
@@ -543,6 +571,7 @@
         `;
       })
       .join("");
+    filterParticipationRows();
   }
 
   function collectParticipationEntries() {
@@ -576,6 +605,14 @@
     });
 
     return entries;
+  }
+
+  function filterParticipationRows() {
+    const needle = (refs.participationSearch?.value || "").trim().toLowerCase();
+    const rows = Array.from(refs.participationBody.querySelectorAll("tr[data-student-id]"));
+    rows.forEach((row) => {
+      row.style.display = !needle || row.textContent.toLowerCase().includes(needle) ? "" : "none";
+    });
   }
 
   function renderReportCard(reportCard) {
@@ -983,9 +1020,12 @@
 
     refs.attendanceLoad.addEventListener("click", loadAttendance);
     refs.attendanceSave.addEventListener("click", saveAttendance);
+    refs.attendanceSearch?.addEventListener("input", filterAttendanceRows);
+    refs.attendanceApplyBulk?.addEventListener("click", applyBulkAttendanceStatus);
 
     refs.participationLoad.addEventListener("click", loadParticipation);
     refs.participationSave.addEventListener("click", saveParticipation);
+    refs.participationSearch?.addEventListener("input", filterParticipationRows);
 
     refs.reportClass.addEventListener("change", syncReportStudents);
     refs.reportLoad.addEventListener("click", loadReport);
