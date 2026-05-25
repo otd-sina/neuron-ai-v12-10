@@ -668,6 +668,91 @@ async def student_messages(request: Request):
             "participation_records": timeline.get("participation_records", []),
         }
     )
+
+
+@router.get("/gradebook/attendance")
+async def student_gradebook_attendance(request: Request):
+    auth = require_student_auth(request)
+    if auth is not None:
+        return auth
+
+    student_id = request.state.student_id
+    student = request.state.student
+    report_card = build_student_report_card(
+        student_id,
+        class_id=student.get("class_id") if isinstance(student, dict) else None,
+    ) or {}
+    return JSONResponse(
+        content={
+            "success": True,
+            "attendance_log": get_student_attendance_log(
+                student_id,
+                class_id=student.get("class_id") if isinstance(student, dict) else None,
+            ),
+            "attendance_summary": report_card.get("attendance_summary") or {},
+        }
+    )
+
+
+@router.get("/gradebook/participation")
+async def student_gradebook_participation(request: Request):
+    auth = require_student_auth(request)
+    if auth is not None:
+        return auth
+
+    student_id = request.state.student_id
+    student = request.state.student
+    timeline = get_student_gradebook_timeline(
+        student_id,
+        class_id=student.get("class_id") if isinstance(student, dict) else None,
+    )
+    report_card = build_student_report_card(
+        student_id,
+        class_id=student.get("class_id") if isinstance(student, dict) else None,
+    ) or {}
+    return JSONResponse(
+        content={
+            "success": True,
+            "records": timeline.get("participation_records", []),
+            "summary": report_card.get("participation_summary") or {},
+        }
+    )
+
+
+@router.get("/gradebook/grades")
+async def student_gradebook_grades(request: Request):
+    auth = require_student_auth(request)
+    if auth is not None:
+        return auth
+
+    student_id = request.state.student_id
+    student = request.state.student
+    report_card = build_student_report_card(
+        student_id,
+        class_id=student.get("class_id") if isinstance(student, dict) else None,
+    ) or {}
+    return JSONResponse(
+        content={
+            "success": True,
+            "recent_assessments": report_card.get("recent_assessments", []),
+            "subject_breakdown": report_card.get("subject_breakdown", []),
+            "grade_average_percentage": report_card.get("grade_average_percentage"),
+        }
+    )
+
+
+@router.get("/messages")
+async def student_messages(request: Request):
+    auth = require_student_auth(request)
+    if auth is not None:
+        return auth
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "messages": list_student_messages(request.state.student_id),
+        }
+    )
 @router.post("/logout")
 async def student_logout(request: Request):
     auth_error = require_student_auth(request)
