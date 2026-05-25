@@ -115,6 +115,30 @@ async def student_gradebook_page():
         return HTMLResponse(content=f.read())
 
 
+@app.get("/student/gradebook/attendance", response_class=HTMLResponse)
+async def student_gradebook_attendance_page():
+    with open(os.path.join(STUDENT_PAGES_DIR, "gradebook_attendance.html"), encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
+
+
+@app.get("/student/gradebook/participation", response_class=HTMLResponse)
+async def student_gradebook_participation_page():
+    with open(os.path.join(STUDENT_PAGES_DIR, "gradebook_participation.html"), encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
+
+
+@app.get("/student/gradebook/grades", response_class=HTMLResponse)
+async def student_gradebook_grades_page():
+    with open(os.path.join(STUDENT_PAGES_DIR, "gradebook_grades.html"), encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
+
+
+@app.get("/student/gradebook/messages", response_class=HTMLResponse)
+async def student_gradebook_messages_page():
+    with open(os.path.join(STUDENT_PAGES_DIR, "gradebook_messages.html"), encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
+
+
 @app.get("/student/profile", response_class=HTMLResponse)
 async def student_profile_page():
     with open(os.path.join(STUDENT_PAGES_DIR, "profile.html"), encoding="utf-8") as f:
